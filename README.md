@@ -4,9 +4,7 @@ Take the word "cat". You can use it of the cat on your lap, or of cats in genera
 "Cats hunt at night." This repository holds an experiment asking whether that
 difference leaves a trace in language models, which have only ever seen text. It
 does: a straight cut through the models' representations, learned from sentences
-about ten nouns, sorts sentences about ten other nouns by how the noun is used. The
-trace is not genre, grammar or the concreteness of the surrounding words, and it is
-thin: present, but not one of the main things that vary when a word changes sentence.
+about ten nouns, sorts sentences about ten other nouns by how the noun is used. The trace is not genre, grammar or the concreteness of the surrounding words, and it is thin: present, but not one of the main things that vary when a word changes sentence.
 
 Results, argument and every sentence: **https://wordmodes.antimaterie.ro**
 

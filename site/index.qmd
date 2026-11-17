@@ -8,7 +8,9 @@ Take the word "cat". You can use it of the cat on your lap, or of cats in genera
 
 It does. Where the model places a word depends on which way the word is being used, and the trace is the same from word to word: a rule learned from sentences about ten nouns sorts sentences about ten other nouns it has never seen. It is not genre, not grammar, and not the concreteness of the surrounding words. It is also thin: present, but not one of the main things that vary when a word changes sentence.
 
-The rest of this page says why that is worth knowing and how to read the result pages.
+Why this is worth knowing and how to read the result pages is discussed below.
+
+A note on the code here: I am a philosopher with basic coding skills, the code here is mostly written by Claude.
 
 ## The result in one picture
 
@@ -26,6 +28,9 @@ Take two sentences with the same word: "The cat jumped off the table and knocked
 The Pattern Constellations Framework (PCF) treats this as a difference between two modes of a word. In object-mode, written $x^{o}$, the word is used in the presence of an instance. In a child, $x^{o}$ forms as a motor pattern inside the pattern-constellation \{X\} that the encounters with the thing have built. It belongs to pre-verbal experience, and it is used only while that experience is active. In abstract-mode, written $x^{a}$, the word runs detached from any instance: in general statements, in idioms, in definitions. A word can have only this mode. "Electron" is learned from its meaning alone, with no encounter and no $electron^{o}$. Earlier write-ups called this mode $x^{c}$; the new name records that detachment from the centre is detachment from a history, and that is what abstraction is.
 
 The two modes meet in the concept, which PCF writes $\mathcal{R}(x^{o}, x^{a})$: the word I use for what I experienced as x, linked to all the ways I can use the word x in language. The same linking relation writes the two kinds of sentence above. "This cat jumped" is $\mathcal{R}(cat^{o}, jump^{a})$. "Cats hunt" is $\mathcal{R}(cat^{a}, hunt^{a})$.
+
+The full Pattern Constellations Framework can be accessed here: **https://pcf.antimaterie.ro/**
+
 
 ## Why look for it in a language model
 
