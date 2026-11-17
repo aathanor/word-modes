@@ -11,10 +11,10 @@ project:
     - figures/
 
 website:
-  title: "The Mark of the Mode"
+  title: "Word modes"
   site-url: https://wordmodes.antimaterie.ro
   favicon: assets/favicon.svg
-  description: "Does a model trained only on text embed a word differently in object-mode and abstract-mode?"
+  description: "Object-words and abstract-words leave different marks in language models: the same noun, used of one particular thing or in general, is placed differently by language models trained only on text."
   page-navigation: true
   bread-crumbs: false
   search: false

@@ -1,5 +1,5 @@
 ---
-title: "The Mark of the Mode"
+title: "Object-words and abstract-words leave different marks in language models"
 subtitle: "Florin Cojocariu · November 2026"
 toc: true
 ---
