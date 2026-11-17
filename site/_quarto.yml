@@ -1,0 +1,70 @@
+project:
+  type: website
+  output-dir: _site
+  pre-render: _export.py
+  render:
+    - "*.qmd"
+    - "rungs/*.qmd"
+  resources:
+    - assets/
+    - data/
+    - figures/
+
+website:
+  title: "The Mark of the Mode"
+  site-url: https://wordmodes.antimaterie.ro
+  favicon: assets/favicon.svg
+  description: "Does a model trained only on text embed a word differently in object-mode and abstract-mode?"
+  page-navigation: true
+  bread-crumbs: false
+  search: false
+  navbar:
+    left:
+      - href: index.qmd
+        text: Argument
+      - href: stages.qmd
+        text: How it was built
+      - href: method.qmd
+        text: Method
+      - text: Ladder
+        menu:
+          - rungs/e1.qmd
+          - rungs/e2.qmd
+          - rungs/e3.qmd
+          - rungs/e4.qmd
+          - rungs/e5.qmd
+          - rungs/e6.qmd
+          - rungs/e7.qmd
+          - rungs/e8.qmd
+          - text: "---"
+          - stops.qmd
+      - href: explorer.qmd
+        text: Sentences
+      - href: pairs.qmd
+        text: Minimal pairs
+      - href: data.qmd
+        text: Data
+  page-footer:
+    left: "Florin Cojocariu · 2026"
+    right: "Sentences from Wikipedia are CC BY-SA 4.0; Project Gutenberg texts are public domain."
+
+format:
+  html:
+    theme: [default, styles.scss]
+    toc: true
+    toc-depth: 2
+    html-math-method:
+      method: katex
+      url: /assets/vendor/katex/
+    include-before-body: _banner.html
+    include-after-body: _stamp.html
+    anchor-sections: true
+    smooth-scroll: false
+    link-external-newwindow: true
+    fig-responsive: true
+
+execute:
+  echo: false
+  output: asis
+  warning: false
+  freeze: false

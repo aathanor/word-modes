@@ -1,0 +1,23 @@
+{
+  "labeler": "Claude Opus 5.5 (claude-opus-5-5), in-session",
+  "instruction": "LABELING.md only",
+  "blind_to": "model labels (natural_labeled.csv not opened), all embeddings and results",
+  "date": "2026-11-16",
+  "human": false,
+  "conventions": [
+    "noun-modifier or material use with no individual X referred to -> X (LABELING.md v2)",
+    "modifier that refers to a particular instance (the river landscape of the Limmat) -> O",
+    "simile or counterfactual comparison containing the target -> A-idiom (test 2: inside a figure)",
+    "verb uses, other senses (chair = person, bridge = card game or music, fork = bifurcation or motorcycle part), company/brand names -> X",
+    "plural particulars on an occasion -> O; habitual or repeated events -> A-gen"
+  ],
+  "revisions": [
+    {
+      "date": "2026-11-16",
+      "criterion": "LABELING.md version 2 (clarifications)",
+      "change": "modifier/material rule applied: 21 sentences relabeled X (rows [5, 6, 14, 37, 47, 52, 89, 91, 98, 123, 130, 139, 140, 158, 167, 171, 209, 262, 266, 220, 278])",
+      "method": "candidates from a spaCy parse (target modifying a following noun) plus the two material uses; each checked against the rule from the sentence alone",
+      "disclosure": "applied after the first \u03ba check; about 25 of Qwen's v1 labels had been seen in the disagreement printout. No other gold label was changed."
+    }
+  ]
+}

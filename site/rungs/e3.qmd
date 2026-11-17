@@ -1,0 +1,9 @@
+---
+title: "3. Not genre"
+---
+
+```{python}
+import sys; sys.path.insert(0, "..")
+from _site import rung
+rung("e3")
+```

@@ -1,0 +1,73 @@
+---
+title: "Method"
+---
+
+## Data
+
+```{python}
+from _site import method_facts
+method_facts()
+```
+
+Sentences were taken whole from two sources, for twenty concrete nouns: Wikipedia (encyclopedic) and English novels from Project Gutenberg by authors born 1760–1930 (fiction), at most three books per author. A sentence was kept if it had 6 to 40 words, contained the target word exactly once (singular or plural, not inside a hyphenated compound), ended like a sentence, and was not a list, caption or table row. Sentences in which the target is capitalised mid-sentence ("Hudson River", "Apple Inc.") were dropped as parts of names. At most five sentences come from any one article and six from any one book. The target was 150 sentences per word per genre; "tomato" yields only 50 usable sentences in the 500 novels.
+
+The nouns are split by word. **Half A** (cat, hammer, apple, river, chair, horse, bottle, bridge, knife, tree) is used for every choice of method. **Half B** (dog, fork, tomato, mountain, door, cow, lamp, road, spoon, stone) is used once, at the end. A guard in the code raises an error if a Half-B sentence reaches any function that chooses a setting.
+
+## Labels
+
+No sentence was labeled by a person.
+
+- **All 5,900 sentences** were labeled by Claude Opus 5.5 through the Anthropic API, one sentence per request, with the criterion below as the whole instruction and the answer restricted to the five labels. The model does not accept a temperature setting, so the labels are one recorded run.
+- **The sample of 300** (15 per word, split across the two genres) was labeled by Claude Opus 5.5 in a separate session, before and without access to any model's labels. Both labelers are the same model, so their agreement can miss errors they share.
+- **A cross-check from another family:** Qwen3.8 27B, run locally, relabeled all sentences under the same criterion. Its agreement with the sample is reported next to Claude's.
+
+### The criterion
+
+```{python}
+from _site import labeling_text
+labeling_text()
+```
+
+### The second labeler
+
+```{python}
+from _site import gold_conventions
+gold_conventions()
+```
+
+### Agreement
+
+The experiments run only if Cohen's κ between the full-set labels and the sample labels is at least 0.7.
+
+```{python}
+from _site import kappa_table
+kappa_table()
+```
+
+## Models and readouts
+
+- **BERT** (`bert-base-uncased`): the embedding of the target word itself, averaged over its word pieces, at the layer chosen on Half A among 6, 9 and 12.
+- **Decoder** (`Qwen/Qwen3-1.7B`): the hidden state at the target word's last piece, at the layer chosen on Half A among 25%, 50% and 75% depth. A decoder reads left to right, so at the target word it has seen only the words before it; in "The cat is on the mat" that is "The". The state at the sentence's last token, which has read the whole sentence, comes from the same pass and is reported as a supplement.
+- **mpnet** (`all-mpnet-base-v2`): one embedding for the whole sentence.
+- **mpnet-multilingual**: only for the Romanian rung.
+
+The probe is a logistic regression on standardised features, object-mode against literal general predication (A-gen). Idioms and definitions are never used to train it.
+
+## Rules fixed before the results
+
+The layer and regularisation for each model (table under Data) were chosen by leave-one-word-out AUC inside Half A.
+
+The verdict thresholds were written down before any embedding was computed:
+
+```{python}
+from _site import thresholds
+thresholds()
+```
+
+## Departures from the plan
+
+- Wikipedia sentences for fourteen words come from the English Wikipedia dump of 1 November 2023, because the live API throttled the harvest. Six words reuse an earlier cache, whose sentence counts do not match its old embeddings; the old embeddings were not used.
+- Fiction comes from Project Gutenberg texts downloaded directly; the corpus bundled with NLTK has only eighteen books.
+- The sample was labeled by a model, not by hand.
+- **Labeling history.** The first round used Qwen3.8 27B for all sentences. Its agreement with the sample was κ = 0.55, below the gate, and no experiment was run. The disagreements fell into cases the criterion did not settle, so clarifications were added under the unchanged criterion (version 2, shown above): modifier and material uses are excluded, habits and procedures are A-gen, similes are idioms, other senses are excluded. Twenty-one sample labels were changed to apply the modifier rule. The full set was then relabeled by Claude Opus 5.5. The first round's labels are kept in `data/labeling_v1/`.
+- The decoder's final-token state is added as a supplementary readout, for the reason given above.

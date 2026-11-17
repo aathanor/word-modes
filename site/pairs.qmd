@@ -1,0 +1,11 @@
+---
+title: "Minimal pairs"
+toc: false
+---
+
+Two hundred written pairs, ten per word. In each pair the subject, its determiner and number, and the verb form are the same; only the rest of the predicate changes, from an occasion to the kind. The numbers are probe(A) − probe(O), from a probe trained on the other half of the words: above zero, the abstract-mode sentence sits further toward abstract-mode. For the decoder's target-word readout both sentences of a pair have the same words up to the target, so its two states are identical and every difference is zero.
+
+```{python}
+from _site import pairs_table
+pairs_table()
+```

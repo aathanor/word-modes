@@ -1,0 +1,8 @@
+# Built by `render.sh`: _export.py copies results in, Quarto renders _site/
+_site/
+.quarto/
+data/
+figures/
+_stamp.html
+_banner.html
+*.quarto_ipynb

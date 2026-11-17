@@ -1,0 +1,10 @@
+---
+title: "Where the argument stops"
+---
+
+Every rung that failed, was mixed, or had too little data to decide, for every model. The claim stands as far as the ladder holds and no further.
+
+```{python}
+from _site import stops
+stops()
+```

@@ -1,0 +1,230 @@
+"""D3: minimal pairs. Same subject NP (determiner, number) and same verb form; only the
+rest of the predicate differs. Written by hand: the point of this set is surface form.
+Each A side is tagged with its sub-label (A-def when it is of the "a/the X is a Y" form)."""
+from __future__ import annotations
+
+import pandas as pd
+
+from .common import DATA
+
+# word | sentence_O | sentence_A | A sub-label
+_PAIRS = """
+cat | The cat is asleep on the windowsill this morning. | The cat is a small carnivorous mammal. | A-def
+cat | The cat was under the bed during the storm last night. | The cat was sacred to the ancient Egyptians. | A-gen
+cat | A cat is sitting on our garden wall right now. | A cat is a domesticated feline. | A-def
+cat | A cat has crept into the shed again this evening. | A cat has a keen sense of smell. | A-gen
+cat | Cats are fighting in the alley outside. | Cats are obligate carnivores. | A-gen
+cat | Cats were howling under my window all last night. | Cats were domesticated in the Near East. | A-gen
+cat | The cat has a thorn in its paw today. | The cat has retractable claws. | A-gen
+cat | The cat is limping after yesterday's fight. | The cat is found on every continent except Antarctica. | A-gen
+cat | A cat was locked in the cellar over the weekend. | A cat was once thought to bring bad luck to sailors. | A-gen
+cat | The cat was missing for two days last week. | The cat was introduced to Australia by European settlers. | A-gen
+hammer | The hammer is on the workbench next to the nails. | The hammer is a tool for driving nails. | A-def
+hammer | The hammer was lying in the rain all night. | The hammer was among the first tools made by humans. | A-gen
+hammer | A hammer is lying in the middle of the driveway. | A hammer is a hand tool with a weighted head. | A-def
+hammer | A hammer has fallen off the scaffolding this morning. | A hammer has a head and a handle. | A-gen
+hammer | Hammers are ringing in the forge across the street. | Hammers are used by carpenters and blacksmiths. | A-gen
+hammer | Hammers were pounding on the roof all afternoon. | Hammers were made of stone before the Bronze Age. | A-gen
+hammer | The hammer has a crack in its handle since yesterday. | The hammer has a long history in human toolmaking. | A-gen
+hammer | The hammer is missing from the toolbox today. | The hammer is used in almost every trade. | A-gen
+hammer | A hammer was left in the attic by the roofers. | A hammer was once a weapon as well as a tool. | A-gen
+hammer | The hammer was too heavy for her to lift that morning. | The hammer was improved by the claw design in Roman times. | A-gen
+apple | The apple is rotting in the fruit bowl. | The apple is a fruit of the rose family. | A-def
+apple | The apple was bruised when it fell from the table. | The apple was cultivated in Central Asia thousands of years ago. | A-gen
+apple | An apple is rolling across the kitchen floor. | An apple is a pome fruit. | A-def
+apple | An apple has fallen on my head just now. | An apple has five seed chambers. | A-gen
+apple | Apples are piled in a basket by the door. | Apples are grown in temperate climates. | A-gen
+apple | Apples were falling from the tree in the wind last night. | Apples were brought to North America by colonists. | A-gen
+apple | The apple has a worm hole near the stem. | The apple has thousands of known cultivars. | A-gen
+apple | The apple is still warm from the oven. | The apple is harvested in autumn. | A-gen
+apple | An apple was stolen from the market stall this morning. | An apple was a common gift for teachers in the past. | A-gen
+apple | The apple was half eaten by the time I came back. | The apple was a symbol of temptation in medieval art. | A-gen
+river | The river is high after last night's rain. | The river is a natural flowing watercourse. | A-def
+river | The river was frozen solid that January. | The river was the main highway of early trade. | A-gen
+river | A river is flooding the lower town this week. | A river is a large natural stream of water. | A-def
+river | A river has burst its banks near the village today. | A river has a source and a mouth. | A-gen
+river | Rivers are rising across the region tonight. | Rivers are fed by rain and melting snow. | A-gen
+river | Rivers were overflowing all over the county last spring. | Rivers were the first boundaries between kingdoms. | A-gen
+river | The river has turned brown since the storm. | The river has shaped human settlement since prehistory. | A-gen
+river | The river is unusually wide near the mill today. | The river is usually wider near its mouth. | A-gen
+river | A river was blocking our path on the second day of the hike. | A river was often worshipped as a god in antiquity. | A-gen
+river | The river was full of ice when we crossed it. | The river was central to the myths of many early cultures. | A-gen
+chair | The chair is by the window in the study. | The chair is a seat for one person. | A-def
+chair | The chair was broken during the party on Saturday. | The chair was a mark of status in medieval Europe. | A-gen
+chair | A chair is blocking the fire exit right now. | A chair is a piece of furniture with a back. | A-def
+chair | A chair has tipped over in the hallway. | A chair has four legs in most designs. | A-gen
+chair | Chairs are stacked against the wall of the hall tonight. | Chairs are made of wood, metal or plastic. | A-gen
+chair | Chairs were scattered across the lawn after the wedding. | Chairs were rare in ordinary homes before the sixteenth century. | A-gen
+chair | The chair has a coffee stain on its cushion. | The chair has existed since ancient Egypt. | A-gen
+chair | The chair is still warm from her sitting in it. | The chair is common in every modern household. | A-gen
+chair | A chair was thrown through the window during the fight. | A chair was once reserved for the head of the household. | A-gen
+chair | The chair was too low for the desk that afternoon. | The chair was redesigned by many modernist architects. | A-gen
+horse | The horse is grazing in the far field this morning. | The horse is a large hoofed mammal. | A-def
+horse | The horse was lame after the race on Sunday. | The horse was domesticated on the Eurasian steppe. | A-gen
+horse | A horse is standing by the gate in the rain. | A horse is an animal with a single toe on each foot. | A-def
+horse | A horse has escaped from the paddock tonight. | A horse has excellent peripheral vision. | A-gen
+horse | Horses are drinking at the trough in the yard. | Horses are herd animals. | A-gen
+horse | Horses were neighing in the stable all night. | Horses were essential to warfare for millennia. | A-gen
+horse | The horse has lost a shoe on the trail today. | The horse has a digestive system suited to grazing. | A-gen
+horse | The horse is sweating after the long ride. | The horse is able to sleep standing up. | A-gen
+horse | A horse was pulling a cart down the lane at dawn. | A horse was a costly possession in medieval times. | A-gen
+horse | The horse was frightened by the thunder last night. | The horse was introduced to the Americas by the Spanish. | A-gen
+bottle | The bottle is on the top shelf of the cupboard. | The bottle is a container with a narrow neck. | A-def
+bottle | The bottle was smashed on the pavement last night. | The bottle was mass-produced only after the industrial revolution. | A-gen
+bottle | A bottle is floating in the harbour this morning. | A bottle is a narrow-necked vessel for liquids. | A-def
+bottle | A bottle has rolled under the car seat. | A bottle has a neck narrower than its body. | A-gen
+bottle | Bottles are clinking in the crate on the back of the van. | Bottles are made of glass or plastic. | A-gen
+bottle | Bottles were lined up on the bar after the party. | Bottles were blown by hand before machines took over. | A-gen
+bottle | The bottle has a crack near its base. | The bottle has been used to store wine for centuries. | A-gen
+bottle | The bottle is half empty after dinner. | The bottle is recycled in most European countries. | A-gen
+bottle | A bottle was washed up on the beach on Monday. | A bottle was a valuable object in the ancient world. | A-gen
+bottle | The bottle was cold from the fridge when she opened it. | The bottle was standardized in size during the twentieth century. | A-gen
+bridge | The bridge is closed for repairs this week. | The bridge is a structure that spans an obstacle. | A-def
+bridge | The bridge was crowded with commuters this morning. | The bridge was a major achievement of Roman engineering. | A-gen
+bridge | A bridge is being repainted near our house. | A bridge is a structure carrying a road over a gap. | A-def
+bridge | A bridge has collapsed on the motorway tonight. | A bridge has to withstand both tension and compression. | A-gen
+bridge | Bridges are closed across the city because of the flood. | Bridges are built from stone, steel or concrete. | A-gen
+bridge | Bridges were swept away by the storm last month. | Bridges were often guarded by toll collectors in the Middle Ages. | A-gen
+bridge | The bridge has a large crack in its middle span. | The bridge has been a symbol of connection in many cultures. | A-gen
+bridge | The bridge is icy and dangerous tonight. | The bridge is studied as a classic problem in structural engineering. | A-gen
+bridge | A bridge was blown up by the retreating army that morning. | A bridge was a costly investment for any medieval town. | A-gen
+bridge | The bridge was shaking in the wind when we drove across. | The bridge was transformed by the invention of steel cables. | A-gen
+knife | The knife is in the sink with the dirty plates. | The knife is a cutting tool with a blade. | A-def
+knife | The knife was found under the sofa yesterday. | The knife was one of the earliest tools made by humans. | A-gen
+knife | A knife is lying on the kitchen floor. | A knife is a blade fixed to a handle. | A-def
+knife | A knife has gone missing from the drawer. | A knife has a sharp edge along one side. | A-gen
+knife | Knives are flashing in the butcher's shop this morning. | Knives are sharpened on a whetstone. | A-gen
+knife | Knives were laid out on the table for the feast last night. | Knives were made of flint before metal was worked. | A-gen
+knife | The knife has a chip in its blade since Tuesday. | The knife has been part of the table setting since the seventeenth century. | A-gen
+knife | The knife is too blunt to cut this bread. | The knife is used in every kitchen in the world. | A-gen
+knife | A knife was pulled on him in the street last night. | A knife was carried by most men in medieval Europe. | A-gen
+knife | The knife was still wet when I picked it up. | The knife was made safer by the rounded tip in France. | A-gen
+tree | The tree is shedding its leaves in our garden this week. | The tree is a perennial plant with a woody trunk. | A-def
+tree | The tree was struck by lightning last night. | The tree was worshipped in many pagan religions. | A-gen
+tree | A tree is lying across the road after the storm. | A tree is a woody plant with branches. | A-def
+tree | A tree has fallen on the neighbour's roof. | A tree has roots, a trunk and a crown. | A-gen
+tree | Trees are swaying wildly in the wind tonight. | Trees are essential for absorbing carbon dioxide. | A-gen
+tree | Trees were burning on the hillside all afternoon. | Trees were cut down across Europe to build ships. | A-gen
+tree | The tree has a swing hanging from its lowest branch. | The tree has evolved independently in many plant families. | A-gen
+tree | The tree is full of birds this morning. | The tree is the longest-living organism on earth. | A-gen
+tree | A tree was planted outside the school on Friday. | A tree was a sacred object for the ancient Celts. | A-gen
+tree | The tree was covered in frost when we woke up. | The tree was a central image in medieval theology. | A-gen
+dog | The dog is barking at the postman right now. | The dog is a domesticated descendant of the wolf. | A-def
+dog | The dog was soaked after the walk this morning. | The dog was the first animal domesticated by humans. | A-gen
+dog | A dog is digging in the flower bed. | A dog is a carnivorous domestic mammal. | A-def
+dog | A dog has stolen the sausages from the barbecue. | A dog has a far better sense of smell than a human. | A-gen
+dog | Dogs are barking all along the street tonight. | Dogs are descended from wolves. | A-gen
+dog | Dogs were howling at the moon last night. | Dogs were used for hunting in ancient Egypt. | A-gen
+dog | The dog has mud all over its paws. | The dog has been bred into hundreds of breeds. | A-gen
+dog | The dog is asleep at the foot of the bed. | The dog is kept as a pet in most countries. | A-gen
+dog | A dog was hit by a car outside the school today. | A dog was a symbol of loyalty in Renaissance painting. | A-gen
+dog | The dog was shivering when we found it under the bridge. | The dog was trained to herd sheep long before farming reached Britain. | A-gen
+fork | The fork is on the floor under the table. | The fork is an eating utensil with prongs. | A-def
+fork | The fork was bent when he dropped it in the disposal yesterday. | The fork was regarded with suspicion in medieval Europe. | A-gen
+fork | A fork is stuck in the toaster. | A fork is a utensil with two or more tines. | A-def
+fork | A fork has fallen behind the cooker. | A fork has four tines in most designs. | A-gen
+fork | Forks are clattering in the restaurant kitchen. | Forks are made of stainless steel or silver. | A-gen
+fork | Forks were missing from the picnic basket on Sunday. | Forks were uncommon at English tables before the seventeenth century. | A-gen
+fork | The fork has a bent tine since the dinner party. | The fork has a history of only a few centuries in Europe. | A-gen
+fork | The fork is still sticky with honey. | The fork is used together with the knife in Western dining. | A-gen
+fork | A fork was left in the dishwasher after the cycle. | A fork was a luxury item in the Byzantine court. | A-gen
+fork | The fork was too big for the child's hand that evening. | The fork was introduced to Italy from Byzantium. | A-gen
+tomato | The tomato is ripening on the windowsill. | The tomato is a fruit of the nightshade family. | A-def
+tomato | The tomato was squashed in the bottom of the bag. | The tomato was brought to Europe from the Americas. | A-gen
+tomato | A tomato is rotting at the back of the fridge. | A tomato is the edible berry of a nightshade plant. | A-def
+tomato | A tomato has split on the vine after the rain. | A tomato has a high water content. | A-gen
+tomato | Tomatoes are drying in the sun on the terrace. | Tomatoes are rich in vitamin C. | A-gen
+tomato | Tomatoes were thrown at the actors on opening night. | Tomatoes were once believed to be poisonous. | A-gen
+tomato | The tomato has a soft spot on one side. | The tomato has many hundreds of cultivated varieties. | A-gen
+tomato | The tomato is too green to eat today. | The tomato is grown in greenhouses throughout the year. | A-gen
+tomato | A tomato was sliced for the sandwiches at lunch. | A tomato was an exotic curiosity in sixteenth-century Spain. | A-gen
+tomato | The tomato was still warm from the garden when I bit into it. | The tomato was classified as a vegetable by the US Supreme Court. | A-gen
+mountain | The mountain is covered in cloud this morning. | The mountain is a landform that rises steeply above its surroundings. | A-def
+mountain | The mountain was shaking during the eruption last week. | The mountain was regarded as the home of gods in many cultures. | A-gen
+mountain | A mountain is looming over the village through the mist. | A mountain is a large natural elevation of the earth. | A-def
+mountain | A mountain has appeared on the horizon as we drive north. | A mountain has its own climate zones. | A-gen
+mountain | Mountains are glowing pink in the sunset tonight. | Mountains are formed by the movement of tectonic plates. | A-gen
+mountain | Mountains were hidden by smoke from the fires all week. | Mountains were long seen as wild and dangerous places. | A-gen
+mountain | The mountain has fresh snow on its summit today. | The mountain has been a challenge for climbers since the nineteenth century. | A-gen
+mountain | The mountain is visible from our window today. | The mountain is colder at its summit than at its base. | A-gen
+mountain | A mountain was climbed by our team on Saturday. | A mountain was often a natural border between peoples. | A-gen
+mountain | The mountain was dark against the sky when we arrived. | The mountain was a favourite subject of Romantic painters. | A-gen
+door | The door is open to the garden this morning. | The door is a movable barrier in an entrance. | A-def
+door | The door was slammed in my face last night. | The door was often decorated with carvings in ancient temples. | A-gen
+door | A door is banging somewhere upstairs. | A door is a hinged panel that closes an opening. | A-def
+door | A door has blown open in the wind. | A door has hinges on one side. | A-gen
+door | Doors are slamming all over the house tonight. | Doors are made of wood, metal or glass. | A-gen
+door | Doors were kicked in during the raid on Monday. | Doors were hung on leather hinges in early medieval houses. | A-gen
+door | The door has a new coat of paint since Friday. | The door has a threshold at its base in most homes. | A-gen
+door | The door is locked and the key is lost. | The door is one of the oldest features of architecture. | A-gen
+door | A door was left unlocked at the back of the shop last night. | A door was a sign of wealth in some ancient cities. | A-gen
+door | The door was stuck when we tried to open it this morning. | The door was a symbol of passage in Roman religion. | A-gen
+cow | The cow is lying down in the shade of the oak. | The cow is a domesticated bovine. | A-def
+cow | The cow was milked before dawn today. | The cow was sacred in ancient India. | A-gen
+cow | A cow is standing in the middle of the road. | A cow is a mature female of cattle. | A-def
+cow | A cow has broken through the fence again. | A cow has four compartments in its stomach. | A-gen
+cow | Cows are mooing in the barn this evening. | Cows are kept for milk and meat. | A-gen
+cow | Cows were grazing by the river when we passed. | Cows were a measure of wealth in early Ireland. | A-gen
+cow | The cow has a calf at her side this morning. | The cow has a gestation period of about nine months. | A-gen
+cow | The cow is restless before the storm. | The cow is raised on every inhabited continent. | A-gen
+cow | A cow was stuck in the mud at the edge of the pond. | A cow was a common dowry in many rural societies. | A-gen
+cow | The cow was frightened by the tractor this afternoon. | The cow was domesticated from the wild aurochs. | A-gen
+lamp | The lamp is flickering on the desk. | The lamp is a device that produces light. | A-def
+lamp | The lamp was knocked over during the argument last night. | The lamp was fuelled by olive oil in the ancient Mediterranean. | A-gen
+lamp | A lamp is burning in the upstairs window. | A lamp is a source of artificial light. | A-def
+lamp | A lamp has gone out in the hallway. | A lamp has a bulb, a base and often a shade. | A-gen
+lamp | Lamps are glowing in every window of the street tonight. | Lamps are powered by electricity in modern homes. | A-gen
+lamp | Lamps were lit along the harbour when the ship came in. | Lamps were filled with whale oil in the nineteenth century. | A-gen
+lamp | The lamp has a broken shade since the move. | The lamp has changed greatly since the invention of the light bulb. | A-gen
+lamp | The lamp is too dim to read by tonight. | The lamp is found in almost every room of a modern house. | A-gen
+lamp | A lamp was left burning in the shop all night. | A lamp was a precious object in a medieval monastery. | A-gen
+lamp | The lamp was still warm when I touched it. | The lamp was a common symbol of knowledge in Victorian art. | A-gen
+road | The road is flooded near the bridge this morning. | The road is a route for travel between places. | A-def
+road | The road was blocked by a fallen tree yesterday. | The road was the backbone of the Roman Empire. | A-gen
+road | A road is being dug up outside our house. | A road is a prepared surface for vehicles. | A-def
+road | A road has caved in near the quarry. | A road has a surface, a base and drainage. | A-gen
+road | Roads are icy across the north tonight. | Roads are paved with asphalt or concrete. | A-gen
+road | Roads were jammed with traffic all through the holiday weekend. | Roads were built by the Romans throughout Europe. | A-gen
+road | The road has a huge pothole near the school. | The road has always been a symbol of the journey in literature. | A-gen
+road | The road is empty at this hour. | The road is maintained by local authorities in most countries. | A-gen
+road | A road was closed to traffic after the accident on Thursday. | A road was a sign of state power in the ancient world. | A-gen
+road | The road was slippery when we drove home last night. | The road was transformed by the arrival of the motor car. | A-gen
+spoon | The spoon is sticking out of the jam jar. | The spoon is a utensil with a shallow bowl. | A-def
+spoon | The spoon was dropped into the soup by accident. | The spoon was carved from wood or bone in prehistory. | A-gen
+spoon | A spoon is lying on the floor by the high chair. | A spoon is a utensil for eating liquids. | A-def
+spoon | A spoon has fallen behind the radiator. | A spoon has a bowl at the end of a handle. | A-gen
+spoon | Spoons are rattling in the drawer as the train passes. | Spoons are used for eating soup and dessert. | A-gen
+spoon | Spoons were set out beside each bowl for breakfast. | Spoons were made of silver in wealthy households. | A-gen
+spoon | The spoon has a dent in its bowl from the fall. | The spoon has existed since the Palaeolithic. | A-gen
+spoon | The spoon is too hot to hold after stirring the soup. | The spoon is the oldest of the common eating utensils. | A-gen
+spoon | A spoon was bent by the magician at the party. | A spoon was a traditional christening gift in England. | A-gen
+spoon | The spoon was still in the cup when I came back. | The spoon was given as a love token in old Wales. | A-gen
+stone | The stone is warm from the afternoon sun. | The stone is a solid mass of mineral matter. | A-def
+stone | The stone was thrown through the window last night. | The stone was the first material used for tools. | A-gen
+stone | A stone is stuck in my shoe. | A stone is a small piece of rock. | A-def
+stone | A stone has cracked the windscreen just now. | A stone has no fixed shape or size. | A-gen
+stone | Stones are rolling down the slope after the rain. | Stones are worn smooth by running water. | A-gen
+stone | Stones were thrown at the police during the riot. | Stones were used as weights in ancient markets. | A-gen
+stone | The stone has moss growing on its north side. | The stone has served as a building material for millennia. | A-gen
+stone | The stone is too heavy for me to lift. | The stone is valued for its durability in building. | A-gen
+stone | A stone was placed on the grave this morning. | A stone was often used to mark a boundary. | A-gen
+stone | The stone was wet and slippery when I stepped on it. | The stone was quarried in vast amounts for medieval cathedrals. | A-gen
+"""
+
+
+def pairs_frame() -> pd.DataFrame:
+    rows = []
+    for line in _PAIRS.strip().splitlines():
+        w, o, a, sub = (x.strip() for x in line.split("|"))
+        rows.append({"word": w, "sentence_O": o, "sentence_A": a, "a_sublabel": sub})
+    return pd.DataFrame(rows)
+
+
+def write_pairs() -> pd.DataFrame:
+    df = pairs_frame()
+    df.to_csv(DATA / "control_pairs.csv", index=False)
+    return df
+
+
+if __name__ == "__main__":
+    write_pairs()

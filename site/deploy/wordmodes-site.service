@@ -1,0 +1,11 @@
+[Unit]
+Description=wordmodes.antimaterie.ro static site (Caddy, localhost:8290)
+After=network.target
+
+[Service]
+ExecStart=%h/.local/bin/caddy run --config %h/sites/wordmodes/Caddyfile --adapter caddyfile
+Restart=on-failure
+Environment=HOME=%h
+
+[Install]
+WantedBy=default.target

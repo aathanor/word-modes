@@ -1,0 +1,22 @@
+# wordmodes.antimaterie.ro — static files only, localhost only; Cloudflare Tunnel in front.
+{
+	admin off
+	auto_https off
+}
+
+:8290 {
+	bind 127.0.0.1 ::1
+	root * {$HOME}/sites/wordmodes/current
+	encode zstd gzip
+	file_server
+	header {
+		X-Content-Type-Options nosniff
+		Referrer-Policy strict-origin-when-cross-origin
+		Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self' data:; connect-src 'self'; frame-ancestors 'none'"
+		-Server
+	}
+	@static path /site_libs/* /assets/* /figures/*
+	header @static Cache-Control "public, max-age=86400"
+	@pages path *.html /
+	header @pages Cache-Control "public, max-age=300"
+}

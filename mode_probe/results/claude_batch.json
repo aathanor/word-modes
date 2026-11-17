@@ -1,0 +1,15 @@
+{
+  "id": "msgbatch_01Dr6G2icagCDnXGfP3Qu93s",
+  "n": 5900,
+  "model": "claude-opus-5-5",
+  "effort": "medium",
+  "submitted": "2026-11-16 16:32:50",
+  "collected": "2026-11-16 16:50:11",
+  "usage": {
+    "in": 598102,
+    "out": 381186,
+    "cache_read": 7302962,
+    "cache_write": 1238
+  },
+  "retried": 0
+}

@@ -1,0 +1,92 @@
+---
+title: "The Mark of the Mode"
+subtitle: "Florin Cojocariu · November 2026"
+toc: true
+---
+
+The pages after this one report an experiment on contextual embeddings. It asks whether a model trained only on text embeds a word differently when the word is used of a present thing and when it is used of no thing in particular. This page says why the question is worth asking, what an answer would show, and how to read the results.
+
+## The result in one picture
+
+A probe trained on ten words sorts sentences about ten other words. Object-mode uses (dark blue) fall to the left, general statements (orange) to the right; idioms (grey) sit between.
+
+```{python}
+from _site import chart
+chart("hero")
+```
+
+## The distinction being tested
+
+Take two sentences with the same word: "The cat jumped off the table and knocked the cup over" and "Cats hunt at night." The first is about one cat on one occasion. It reports an encounter, and it could be true of exactly one animal on one afternoon. The second is about no cat. It holds of the kind, it can be said in a room with no cat in it, and no particular cat makes it true.
+
+The Pattern Constellations Framework (PCF) treats this as a difference between two modes of a word. In object-mode, written $x^{o}$, the word is used in the presence of an instance. In a child, $x^{o}$ forms as a motor pattern inside the pattern-constellation \{X\} that the encounters with the thing have built. It belongs to pre-verbal experience, and it is used only while that experience is active. In abstract-mode, written $x^{a}$, the word runs detached from any instance: in general statements, in idioms, in definitions. A word can have only this mode. "Electron" is learned from its meaning alone, with no encounter and no $electron^{o}$. Earlier write-ups called this mode $x^{c}$; the new name records that detachment from the centre is detachment from a history, and that is what abstraction is.
+
+The two modes meet in the concept, which PCF writes $\mathcal{R}(x^{o}, x^{a})$: the word I use for what I experienced as x, linked to all the ways I can use the word x in language. The same linking relation writes the two kinds of sentence above. "This cat jumped" is $\mathcal{R}(cat^{o}, jump^{a})$. "Cats hunt" is $\mathcal{R}(cat^{a}, hunt^{a})$.
+
+## Why look for it in a language model
+
+Meaning lives in language. Each speaker has a personal linguistic pattern-constellation ⟨x⟩, shaped by a history of use. Public use of a word, $\overline{\langle x \rangle}$, is the aggregate of all uses as they lie in the sediment of written text. No living person holds it. A large language model is the one thing that comes close, because its training compresses that sediment.
+
+The encounter is not in the sediment. A sentence written from an encounter does not carry the cat, the afternoon, or the writer's concern. What it can carry is the way people write when they write from an encounter: what they attend to, what they predicate, how they situate the thing in time. If that way of writing is regular enough across writers and words, training will have picked it up, and the model will embed $x^{o}$ uses and $x^{a}$ uses of a word in different places.
+
+So the experiment asks a narrow question: does the text sediment carry a mark of the mode of use, and has the model extracted it as one feature shared across words?
+
+## What an answer would show
+
+A positive answer does two things.
+
+It gives the $x^{o}$/$x^{a}$ distinction a foothold outside PCF's notation. The distinction was introduced to describe what happens in a person. If it also shows up as a regularity in public text, found by a model that knows nothing of the framework, then it is a real division in how language is used, and the notation tracks it.
+
+It also says what the model has. The model has the mark of object-mode and none of what makes it object-mode. No encounter stands behind any of its sentences. Its "rod", the region where object-mode uses gather, is a substitute for $x^{o}$ built from sediment, which is the reading of LLMs the framework already gives: a renderer of $\overline{\langle x \rangle}$, restricted by the prompt, with no centre and no history behind the rendering.
+
+A negative answer would also be informative. It would mean that writing from an encounter leaves no regular trace in text, and that the difference between the modes lives only in the speakers. PCF does not need the trace to exist. The claim that LLMs build a substitute for $x^{o}$ from the sediment would fall.
+
+The results are evidence for the distinction and are not the distinction. Geometry in an embedding space is a picture of sediment. It is never the practice that left the sediment, and the pages that follow should not be read as showing that a model has object-mode, understands, or refers.
+
+## Where this comes from
+
+The experiment rewrites a study from 2025, "Patterns, Instrumentalism, and Mild Realism". That study sorted sentences into literal and figurative uses of words like "cat" and "fork", embedded them with SBERT, and found literal uses clustering tightly ("rods") and figurative uses spreading wide ("caps"). It read the rod as the object-word and the cap as the word-concept.
+
+Two things went wrong. First, the validation was circular: the literal and figurative categories were cut from the same projection that was then used to validate the axis. Corrected with held-out data, external labels and transfer to other words, the separation survived, weaker (AUC 0.925 on external validation, 0.760 to 0.990 across words). Second, and more important, the cut was the wrong one. "Cats are mammals" is literal and abstract-mode. "Let the cat out of the bag" is figurative and also abstract-mode. Literal and figurative is a division inside $x^{a}$, and comparing it with object-mode mixed two differences. It also let a confound in: figurative uses of a word come from many unrelated topics, so they spread for that reason alone.
+
+The new experiment keeps the question and changes the cut. Object-mode is compared with literal general predication, $\mathcal{R}(cat^{o}, p)$ against $\mathcal{R}(cat^{a}, p)$, so that literalness is held fixed and only the mode varies. Idioms and definitions are kept as separate groups and never pooled.
+
+## How the experiment is built
+
+The sentences are natural, taken from encyclopedic text and from fiction, for twenty concrete nouns split into two halves. Every choice of method is made on the first half. The second half is used once, at the end.
+
+::: {.proposed-edit}
+No sentence is labeled by a person. Every sentence is labeled by a language model that reads only the labeling criterion. A sample of 300 sentences is labeled a second time, separately, and every result is also reported on that sample alone. A local model from a different family relabels everything as a cross-check.
+[Proposed change. Original: "A sample of 300 sentences is labeled by hand, and every result is also reported on that sample alone."]{.was}
+:::
+
+```{python}
+from _site import stage_flow
+stage_flow()
+```
+
+The results are reported as a ladder. Each rung answers one question and depends on the ones before it.
+
+- **Prominence.** Without labels, is the mode one of the main directions along which a word's embeddings vary? This is the rung that supports "extracted from the sediment" most directly, since nothing told the model, or the analysis, what to look for.
+- **Shared direction.** Does a probe trained on some words separate the modes in words it never saw? If each word only had its own two clusters, it would not.
+- **Not genre.** Does the direction carry over from encyclopedic text to fiction and back? Encyclopedias are mostly abstract-mode and novels mostly object-mode, so a genre detector would fail here.
+- **Not grammar.** Does the direction do better than a classifier that sees only determiners, number and tense, and does it survive pairs of sentences with the same surface form ("The cat is on the mat" and "The cat is a solitary hunter")?
+- **Not concreteness.** Does it survive when the concreteness of the other words in the sentence is removed?
+- **Predictions.** Definitions are meaning with no occasion at all, so they should sit at the far abstract end of a direction that never saw them. Where idioms fall is an open question.
+- **Agreement across models.** Do an encoder, a decoder and a sentence model order the same sentences in the same way?
+- **Not English syntax** (if Romanian data is supplied). Does the direction learned on English carry over to Romanian, which marks definiteness differently?
+
+## How to read the results
+
+::: {.proposed-edit}
+The result pages follow the ladder in that order. Each states the question, the numbers on the full set and on the separately labeled sample, and a verdict per model. A closing section lists every rung that failed or had too little data to decide. The claim stands as far as the ladder holds and no further. If the probe does not beat the grammar classifier, the mark is carried mainly by grammar, and the paper becomes a paper about how grammar records the mode.
+[Proposed change. Original: "… the numbers on the full set and on the hand-labeled sample …"]{.was}
+:::
+
+## The ladder
+
+```{python}
+from _site import ladder, scripts
+ladder()
+scripts()
+```

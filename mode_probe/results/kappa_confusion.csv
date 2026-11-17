@@ -1,0 +1,5 @@
+label_gold,A-gen,A-idiom,O,X
+A-gen,49,2,7,2
+A-idiom,0,26,2,5
+O,2,1,146,5
+X,0,0,1,52

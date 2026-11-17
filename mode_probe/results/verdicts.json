@@ -1,0 +1,160 @@
+{
+  "tag": null,
+  "generated": "2026-11-16T22:08:34",
+  "models": [
+    "bert",
+    "decoder",
+    "mpnet",
+    "decoder_final"
+  ],
+  "primary": [
+    "bert",
+    "decoder"
+  ],
+  "selected": {
+    "bert": {
+      "layer": "L9",
+      "C": 0.01
+    },
+    "decoder": {
+      "layer": "L21",
+      "C": 0.001
+    },
+    "mpnet": {
+      "layer": "S",
+      "C": 0.001
+    },
+    "decoder_final": {
+      "layer": "final_L21",
+      "C": 0.001
+    }
+  },
+  "data_line": "5900 natural sentences, 20 words, 3000 Wikipedia and 2900 fiction; 200 minimal pairs.",
+  "label_line": "Model labels (claude-opus-5-5): O 3023, A-gen 956, A-idiom 519, A-def 11, X 1391. Gold: 300 sentences. Cohen's \u03ba (model vs gold, n=300) = 0.862; cross-family check, qwen3.8:27b vs gold: \u03ba = 0.710. The two labelers agree on 80% of all 5,900 sentences (\u03ba = 0.674).",
+  "gold": {
+    "per_word": 15,
+    "labeler": "Claude Opus 5.5 (claude-opus-5-5), blind to the model labels; no human labels",
+    "human": false
+  },
+  "rungs": [
+    {
+      "id": "e1",
+      "title": "Prominence",
+      "run": true,
+      "verdicts": {
+        "bert": "not supported",
+        "decoder": "not supported",
+        "mpnet": "not supported",
+        "decoder_final": "not supported"
+      }
+    },
+    {
+      "id": "e2",
+      "title": "Shared direction",
+      "run": true,
+      "verdicts": {
+        "bert": "supported",
+        "decoder": "supported",
+        "mpnet": "supported",
+        "decoder_final": "supported"
+      }
+    },
+    {
+      "id": "e3",
+      "title": "Not genre",
+      "run": true,
+      "verdicts": {
+        "bert": "supported",
+        "decoder": "supported",
+        "mpnet": "supported",
+        "decoder_final": "supported"
+      }
+    },
+    {
+      "id": "e4",
+      "title": "Not grammar",
+      "run": true,
+      "verdicts": {
+        "bert": "supported",
+        "decoder": "mixed",
+        "mpnet": "supported",
+        "decoder_final": "supported"
+      },
+      "grammar_wins": {
+        "bert": false,
+        "decoder": false,
+        "mpnet": false,
+        "decoder_final": false
+      }
+    },
+    {
+      "id": "e5",
+      "title": "Not concreteness",
+      "run": true,
+      "verdicts": {
+        "bert": "supported",
+        "decoder": "supported",
+        "mpnet": "supported",
+        "decoder_final": "supported"
+      }
+    },
+    {
+      "id": "e6",
+      "title": "Predictions",
+      "run": true,
+      "verdicts": {
+        "bert": "definitions: not supported (underpowered); idioms: between O and A-gen",
+        "decoder": "definitions: not supported (underpowered); idioms: between O and A-gen",
+        "mpnet": "definitions: not supported (underpowered); idioms: between O and A-gen",
+        "decoder_final": "definitions: supported (underpowered); idioms: between O and A-gen"
+      },
+      "detail": {
+        "bert": {
+          "definitions": "not supported (underpowered)",
+          "idioms": "between O and A-gen"
+        },
+        "decoder": {
+          "definitions": "not supported (underpowered)",
+          "idioms": "between O and A-gen"
+        },
+        "mpnet": {
+          "definitions": "not supported (underpowered)",
+          "idioms": "between O and A-gen"
+        },
+        "decoder_final": {
+          "definitions": "supported (underpowered)",
+          "idioms": "between O and A-gen"
+        }
+      }
+    },
+    {
+      "id": "e7",
+      "title": "Same direction across models",
+      "run": true,
+      "verdicts": {
+        "all": "supported"
+      },
+      "pairs": {
+        "bert vs decoder": 0.7730178521515452,
+        "bert vs mpnet": 0.7669499686811388,
+        "decoder vs mpnet": 0.7477862447213051
+      }
+    },
+    {
+      "id": "e8",
+      "title": "Not English syntax",
+      "run": false
+    }
+  ],
+  "stops": [
+    "No human gold set: the gold labels come from a second model (Claude Opus 5.5 (claude-opus-5-5), blind to the model labels; no human labels), so \u03ba measures agreement between two models, not between a model and a person.",
+    "E1 (BERT): not supported \u2014 the mode is not among the top three directions of variation.",
+    "E1 (Decoder): not supported \u2014 the mode is not among the top three directions of variation.",
+    "E1 (mpnet): not supported \u2014 the mode is not among the top three directions of variation.",
+    "E1 (Decoder, final-token readout (supplementary)): not supported \u2014 the mode is not among the top three directions of variation.",
+    "E4 (Decoder): mixed.",
+    "E6 definitions (BERT): not supported (underpowered).",
+    "E6 definitions (Decoder): not supported (underpowered).",
+    "E6 definitions (mpnet): not supported (underpowered)."
+  ]
+}

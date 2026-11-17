@@ -1,0 +1,86 @@
+# All choices below were fixed before any embedding was computed.
+seed: 20261116
+
+words:
+  A: [cat, hammer, apple, river, chair, horse, bottle, bridge, knife, tree]
+  B: [dog, fork, tomato, mountain, door, cow, lamp, road, spoon, stone]
+
+plurals:
+  knife: knives
+  tomato: tomatoes
+
+harvest:
+  per_word_per_genre: 150
+  quick_per_word: 50
+  min_tokens: 6
+  max_tokens: 40
+  max_per_source: {wikipedia: 5, fiction: 6}
+  legacy_cache_dir: ../cache/clean_by_word          # relative to mode_probe/
+  legacy_emb_pattern: ../cache/word_embeddings_in_context_{word}.npy
+  wiki_source: dump               # dump (wikimedia/wikipedia 20231101.en parquet) | api
+  wiki_dump_shards: 3
+  wiki_articles_per_word: 80       # api only
+  gutenberg:
+    n_books: 500
+    author_birth_min: 1760
+    author_birth_max: 1930
+    seconds_between_requests: 2.0
+    mirror: https://www.gutenberg.org/cache/epub/{id}/pg{id}.txt
+
+gold:
+  per_word: 15
+  labeler: "Claude Opus 5.5 (claude-opus-5-5), blind to the model labels; no human labels"
+  human: false
+
+labeler:
+  backend: anthropic_batch        # anthropic_batch | ollama | openai_compatible (llama-server)
+  claude:
+    model: claude-opus-5-5
+    effort: medium
+    max_tokens: 4096
+  model: qwen3.8:27b
+  url: http://localhost:11434
+  alt_model: Muse-Glimmer-30B     # served by llama-server if backend=openai_compatible
+  alt_url: http://localhost:8080
+  kappa_min: 0.7
+
+models:
+  bert:
+    name: bert-base-uncased
+    kind: token_mean
+    layers: [6, 9, 12]
+  decoder:
+    name: Qwen/Qwen3-1.7B
+    kind: token_last
+    depth_fractions: [0.25, 0.50, 0.75]
+  mpnet:
+    name: sentence-transformers/all-mpnet-base-v2
+    kind: sentence
+  multilingual:
+    name: sentence-transformers/paraphrase-multilingual-mpnet-base-v2
+    kind: sentence
+
+primary_models: [bert, decoder]
+main_models: [bert, decoder, mpnet]
+quick_models: [bert, mpnet]
+
+probe:
+  C_grid: [0.001, 0.01, 0.1, 1.0]
+  n_permutations: 200
+  n_bootstrap: 1000
+
+# Verdict rules, fixed in advance. A verdict is "underpowered" when any class used
+# by the test has fewer than min_per_class sentences.
+verdicts:
+  min_per_class: 20
+  e1_supported_rank: 3          # pooled first mode-aligned PC rank <= this
+  e1_aligned_auc: 0.8
+  e2_supported_auc: 0.70        # median held-out-word AUC (LOWO) and pooled A<->B above null95
+  e3_supported_auc: 0.70
+  e3_max_drop: 0.10
+  e4_alpha: 0.01
+  e5_max_drop: 0.05
+  e5_mixed_drop: 0.10
+  e6_alpha: 0.05
+  e7_supported_rho: 0.5
+  e7_mixed_rho: 0.3

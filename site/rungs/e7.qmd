@@ -1,0 +1,9 @@
+---
+title: "7. Same direction across models"
+---
+
+```{python}
+import sys; sys.path.insert(0, "..")
+from _site import rung
+rung("e7")
+```

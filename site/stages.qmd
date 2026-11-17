@@ -1,0 +1,76 @@
+---
+title: "How it was built"
+subtitle: "From twenty words to an eight-rung ladder, one stage at a time"
+toc: true
+---
+
+```{python}
+from _site import stage_flow
+stage_flow(link=False)
+```
+
+## 1. Twenty words {#words}
+
+Twenty concrete nouns, chosen so that each has both a plain object-mode use and general uses. They are split by word, not by sentence: a probe tested on "dog" has never seen a sentence about a dog.
+
+```{python}
+from _site import halves
+halves()
+```
+
+## 2. Sentences {#sentences}
+
+Whole sentences from two kinds of writing: Wikipedia (encyclopedic) and English novels from Project Gutenberg (fiction). Each sentence contains its word once. At most five sentences come from one article and six from one book, so no single text dominates a word.
+
+```{python}
+from _site import chart
+chart("counts")
+```
+
+## 3. Labels {#labels}
+
+Every sentence gets one of five labels, by a fixed criterion read in order: **O** if it is about one particular thing on one occasion; **A-idiom** if the word sits inside a fixed expression or figure; **A-def** if it states what the thing is; **A-gen** for any other general statement; **X** to exclude names, other senses and nouns used only as modifiers. The full criterion is on the [Method](method.qmd) page.
+
+```{python}
+chart("labels")
+```
+
+## 4. The gate {#gate}
+
+No experiment runs unless the labels agree with a sample labeled separately (300 sentences) at Cohen's κ ≥ 0.7. The first attempt failed; the criterion was clarified where it had left cases open, the sentences were relabeled, and the second attempt passed.
+
+```{python}
+chart("kappa")
+```
+
+## 5. Three ways to read a word {#readouts}
+
+The same sentence, read by three models. What each one has taken in when it reaches the target word is what the probe gets to see.
+
+```{python}
+from _site import readouts
+readouts()
+```
+
+The decoder's limit matters for the grammar test: in a minimal pair such as "The cat is on the mat" and "The cat is a solitary hunter", both sentences begin "The cat", so at "cat" the decoder's two states are identical. Its state at the last word, which has read everything, is reported alongside as a supplement.
+
+## 6. The probe and its controls {#probe}
+
+A probe is the simplest possible reader: a straight line through the embedding space, fitted to put object-mode on one side and general statements on the other. It is trained on Half A and asked to sort Half B, the words it never saw.
+
+```{python}
+from _site import halves
+halves()
+```
+
+Each result is checked against what chance would give. The probe is retrained 200 times with the labels shuffled within each word; the real result must beat the 95th percentile of those shuffled runs. It must also beat a classifier that sees only grammar (determiner, number, tense, pronouns, length, position), survive removing concreteness, and hold across genres.
+
+## 7. The ladder {#ladder}
+
+The results are read as a ladder: each rung answers one question and depends on the ones below it.
+
+```{python}
+from _site import ladder, scripts
+ladder()
+scripts()
+```

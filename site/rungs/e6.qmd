@@ -1,0 +1,11 @@
+---
+title: "6. Predictions"
+---
+
+```{python}
+import sys; sys.path.insert(0, "..")
+from _site import rung
+rung("e6", interactive='<p><strong>Interactive.</strong> Hover a point to read its sentence. Model: <select class="strip-model"></select></p><div class="strip" data-view="labels"></div>')
+```
+
+<script src="../assets/strip.js"></script>

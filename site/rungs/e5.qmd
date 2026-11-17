@@ -1,0 +1,9 @@
+---
+title: "5. Not concreteness"
+---
+
+```{python}
+import sys; sys.path.insert(0, "..")
+from _site import rung
+rung("e5")
+```

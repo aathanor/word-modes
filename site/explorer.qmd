@@ -1,0 +1,10 @@
+---
+title: "Sentences"
+toc: false
+---
+
+Every sentence in the experiment, with its label from the model that labeled the full set, its label from the second labeler where it is in the sample, and the probe score each model gives it. Scores come from a probe that never saw the sentence's word (trained on the other half of the words). Higher means further toward abstract-mode.
+
+<div id="explorer"><p>Loading…</p></div>
+
+<script src="assets/explorer.js"></script>

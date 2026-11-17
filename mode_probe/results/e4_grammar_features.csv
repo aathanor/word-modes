@@ -1,0 +1,16 @@
+feature
+det_definite
+det_indefinite
+det_demonstrative
+det_possessive
+det_quantifier
+det_none
+tense_past
+tense_present
+tense_modal
+tense_none
+plural
+has_pronoun
+n_pronouns
+length
+position
