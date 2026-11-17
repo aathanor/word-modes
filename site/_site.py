@@ -219,7 +219,8 @@ def ladder() -> None:
                'data files. The pipeline runs them in id order; the argument reads them in this order.</span></div></div>')
     _out("".join(out))
     if V.get("stops"):
-        _out(f"[Where the argument stops](stops.qmd) lists every test that did not hold outright ({len(V['stops'])}).")
+        _out(f"[Where the argument stops](stops.qmd) lists every test that did not hold outright, model by model "
+             f"({len(V['stops'])} entries).")
 
 
 def chart(name: str, depth: int = 0) -> None:
@@ -251,7 +252,7 @@ def stage_flow(link: bool = True) -> None:
         ("sentences", "Sentences", f"{n:,}", f"Wikipedia {gw:,} · fiction {n - gw:,}"),
         ("labels", "Labels", "5", f"O {lc.get('O', 0):,} · A-gen {lc.get('A-gen', 0):,} · idiom {lc.get('A-idiom', 0):,} · "
                                   f"definition {lc.get('A-def', 0):,} · excluded {lc.get('X', 0):,}"),
-        ("gate", "Gate", f"κ {kap:.2f}" if kap else "κ", "agreement with a separately labeled sample; 0.7 required"),
+        ("gate", "Gate", f"κ {kap:.2f}" if kap else "κ", "agreement with a second labeling of 300 sentences; 0.7 required"),
         ("readouts", "Embeddings", "3", "BERT · Decoder · mpnet"),
         ("probe", "Probe", "A → B", "every choice on Half A; Half B tested once"),
         ("ladder", "Tests", f"{held} of {len(ran)}", "held outright for every model; the rest held in part, "
@@ -270,8 +271,8 @@ def halves() -> None:
     a = "".join(f'<span class="chip chip-a">{w}</span>' for w in cfg["words"]["A"])
     b = "".join(f'<span class="chip chip-b">{w}</span>' for w in cfg["words"]["B"])
     _out(f'<div class="halves"><div class="half"><div class="half-h">Half A: every choice is made here</div>{a}'
-         f'<div class="half-f">layer, regularisation, thresholds</div></div>'
-         f'<div class="half-arrow">→</div><div class="half"><div class="half-h">Half B: used once, at the end</div>{b}'
+         f'<div class="half-f">which layer to read, how strongly to regularise</div></div>'
+         f'<div class="half-arrow">→</div><div class="half"><div class="half-h">Half B: never used to choose anything</div>{b}'
          f'<div class="half-f">a guard in the code stops Half B from reaching any tuning step</div></div></div>')
 
 
@@ -329,7 +330,7 @@ def rung(key: str, interactive: str | None = None) -> None:
         _out(INTRO[key])
     entry = next((r for r in V.get("rungs", []) if r["id"] == key), None)
     if entry is None or not entry["run"] or key not in S:
-        _out("This rung was not run. " + (
+        _out("This test was not run. " + (
             "It needs Romanian sentences labeled O and A-gen (`data/romanian_labeled.csv`)."
             if key == "e8" else ""))
         return

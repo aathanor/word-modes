@@ -79,7 +79,7 @@
               Plot.ruleX([150, 300], {stroke: GRID})]
     }));
     put(el, `<div class="viz-legend"><span class="lg"><span class="sw" style="background:#52514e"></span>Wikipedia</span><span class="lg"><span class="sw" style="background:#b0aea6"></span>fiction</span></div>`,
-        chart, `<p class="viz-note">Target: 150 per word per genre. Half A above the line of “dog”, Half B from “dog” down.</p>`);
+        chart, `<p class="viz-note">Target: 150 per word per genre; tomato has only 50 fiction sentences. Half A is the first ten words (cat to tree), Half B the last ten (dog to stone).</p>`);
   };
 
   charts.labels = (el, v) => {
@@ -93,7 +93,7 @@
                                tip: true, title: d => `${d.g}: ${d.n} ${d.l}`}))]
     }));
     put(el, modeLegend(order), chart,
-        `<p class="viz-note">Encyclopedic text leans abstract, fiction leans object-mode: the confound rung 3 tests. X (excluded) is mostly names, other senses, and nouns used as modifiers.</p>`);
+        `<p class="viz-note">Wikipedia has far more general statements than fiction: among O and A-gen sentences, 39% are A-gen in Wikipedia and 12% in fiction. A genre detector could pass for a mode detector; E3 tests that. X (excluded) is mostly nouns used as modifiers or materials, then other senses and parts of speech.</p>`);
   };
 
   charts.kappa = (el, v) => {

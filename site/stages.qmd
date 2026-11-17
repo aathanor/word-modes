@@ -11,7 +11,7 @@ stage_flow(link=False)
 
 ## 1. Twenty words {#words}
 
-Twenty concrete nouns, chosen so that each has both a plain object-mode use and general uses. They are split by word, not by sentence: a probe tested on "dog" has never seen a sentence about a dog.
+Twenty concrete nouns, chosen so that each has both a plain object-mode use and general uses. They are split by word, not by sentence: a probe tested on "dog" has never seen a sentence about a dog. Every choice of method (which layer of each model to read, how strongly to regularise the probe) is made on Half A alone.
 
 ```{python}
 from _site import halves
@@ -20,7 +20,9 @@ halves()
 
 ## 2. Sentences {#sentences}
 
-Whole sentences from two kinds of writing: Wikipedia (encyclopedic) and English novels from Project Gutenberg (fiction). Each sentence contains its word once. At most five sentences come from one article and six from one book, so no single text dominates a word.
+Whole sentences from two kinds of writing: English Wikipedia (encyclopedic) and English-language novels from Project Gutenberg (fiction). The novels are by authors born between 1760 and 1930, at most three books per author; poetry, drama, short-story collections and children's books are left out. Each sentence contains its word exactly once, has 6 to 40 words, and ends a sentence properly; sentences where the word is capitalised mid-sentence (usually a name) are dropped.
+
+No single text should dominate a word, so at most five sentences come from one Wikipedia article and six from one book. One exception: 633 of the 3,000 Wikipedia sentences were reused from the 2025 study and collected before this cap existed. Among them one article can supply many sentences for the same word, up to 23 ("Steam hammer" for *hammer*, "List of individual cats" for *cat*); seven article–word pairs exceed five. *Tomato* has only 50 fiction sentences: the novels did not contain more that passed the filters.
 
 ```{python}
 from _site import chart
@@ -29,7 +31,9 @@ chart("counts")
 
 ## 3. Labels {#labels}
 
-Every sentence gets one of five labels, by a fixed criterion read in order: **O** if it is about one particular thing on one occasion; **A-idiom** if the word sits inside a fixed expression or figure; **A-def** if it states what the thing is; **A-gen** for any other general statement; **X** to exclude names, other senses and nouns used only as modifiers. The full criterion is on the [Method](method.qmd) page.
+Every sentence gets one of five labels, by a fixed criterion read in order: **O** if it is about one particular thing on one occasion; **A-idiom** if the word sits inside a fixed expression or figure; **A-def** if it states what the thing is; **A-gen** for any other general statement; **X** to exclude the rest: nouns used only as modifiers or materials ("stone wall", "built of stone"), other senses and parts of speech (a fork in the road, a gun's hammer, a binary tree, "to hammer"), and names. The full criterion is on the [Method](method.qmd) page.
+
+No sentence was labeled by a person. All 5,900 were labeled by Claude Opus 5.5 (Anthropic) through its API, one sentence per request, with the criterion as the only instruction.
 
 ```{python}
 chart("labels")
@@ -37,7 +41,11 @@ chart("labels")
 
 ## 4. The gate {#gate}
 
-No experiment runs unless the labels agree with a sample labeled separately (300 sentences) at Cohen's κ ≥ 0.7. The first attempt failed; the criterion was clarified where it had left cases open, the sentences were relabeled, and the second attempt passed.
+No experiment runs unless the labels agree with a second labeling of a 300-sentence sample (15 per word) at Cohen's κ ≥ 0.7. κ is agreement corrected for chance: 0 is chance, 1 is perfect.
+
+The sample was labeled by Claude Opus 5.5 working from the criterion alone, without seeing any model label, embedding or result. Both labelings therefore come from the same model, and κ = 0.86 measures how consistently that model applies the criterion, not agreement between independent judges. The independent check is the cross-check: Qwen3.8 27B, a model from another family run locally, relabeled all sentences under the same criterion and reaches κ = 0.71. A human labeling of the same sample is planned.
+
+The first attempt, with Qwen labeling everything under the original criterion, failed (κ = 0.55). The disagreements showed cases the criterion did not settle, chiefly nouns used as modifiers. Clarifications were added for those cases, and the sample's labels were revised under them (21 sentences moved to X). This happened before any experiment had been run, so no result could influence it; but the sample that measures agreement also shaped the clarifications, which makes the second κ somewhat optimistic.
 
 ```{python}
 chart("kappa")
@@ -56,21 +64,33 @@ The decoder's limit matters for the grammar test: in a minimal pair such as "The
 
 ## 6. The probe and its controls {#probe}
 
-A probe is the simplest possible reader: a straight line through the embedding space, fitted to put object-mode on one side and general statements on the other. It is trained on Half A and asked to sort Half B, the words it never saw.
+A probe is the simplest possible reader: a single straight cut through the embedding space (a regularised logistic regression), fitted to put object-mode sentences on one side and general statements on the other. It is trained on Half A and asked to sort Half B, the words it never saw, and then the other way round. A third check leaves out one word at a time: trained on nineteen words, tested on the twentieth.
 
 ```{python}
 from _site import halves
 halves()
 ```
 
-Each result is checked against what chance would give. The probe is retrained 200 times with the labels shuffled within each word; the real result must beat the 95th percentile of those shuffled runs. It must also beat a classifier that sees only grammar (determiner, number, tense, pronouns, length, position), survive removing concreteness, and hold across genres.
+Each result is checked against what chance would give. The probe is retrained 200 times with the labels shuffled within each word; the real result must beat the 95th percentile of those shuffled runs. It must also beat a classifier that sees only grammar (determiner, number, tense, pronouns, length, position, read off a spaCy parse), survive removing the concreteness of the other words (from published ratings), and hold across genres.
 
 ## 7. The tests {#ladder}
 
-The experiments are numbered E1 to E8 and run in that order, from the most demanding claim down. They are read in the order the argument needs them: first whether there is a mark at all, then whether it is something else, then whether it behaves as a mark of the mode should, and last how visible it is with nothing pointing at it.
+The experiments are numbered E1 to E8 as in the original plan, and the pipeline runs them in that order. They are read in the order the argument needs them: first whether there is a mark at all, then whether it is something else, then whether it behaves as a mark of the mode should, and last how visible it is with nothing pointing at it.
 
 ```{python}
 from _site import ladder, scripts
 ladder()
 scripts()
 ```
+
+## Sources and credits {#credits}
+
+- **Wikipedia.** Sentences quoted from English Wikipedia articles, by Wikipedia contributors, licensed [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/). Most come from the November 2023 English dump as published by the Wikimedia Foundation on Hugging Face ([wikimedia/wikipedia](https://huggingface.co/datasets/wikimedia/wikipedia), 20231101.en). The [sentence explorer](explorer.qmd) links each sentence to its article. For 36 sentences reused from the 2025 study the article could not be identified; they are marked as such.
+- **Project Gutenberg.** Sentences quoted from novels in the [Project Gutenberg](https://www.gutenberg.org) collection, public domain in the United States; the explorer gives each sentence's ebook number.
+- **Models whose representations are read.** [bert-base-uncased](https://huggingface.co/google-bert/bert-base-uncased) (Devlin et al. 2019, Google); [Qwen3-1.7B](https://huggingface.co/Qwen/Qwen3-1.7B) (Qwen Team, Alibaba, 2025); [all-mpnet-base-v2](https://huggingface.co/sentence-transformers/all-mpnet-base-v2) (sentence-transformers; Reimers & Gurevych 2019, built on MPNet, Song et al. 2020). All Apache 2.0.
+- **Labelers.** Claude Opus 5.5 (Anthropic), all sentences and the 300-sentence sample; Qwen3.8 27B, run locally through Ollama, the cross-check and the first attempt.
+- **Grammar features.** [spaCy](https://spacy.io) with the `en_core_web_sm` English model (Explosion; MIT).
+- **Concreteness.** Brysbaert, M., Warriner, A. B., & Kuperman, V. (2014). Concreteness ratings for 40 thousand generally known English word lemmas. *Behavior Research Methods*, 46, 904–911.
+- **Agreement.** Cohen, J. (1960). A coefficient of agreement for nominal scales. *Educational and Psychological Measurement*, 20, 37–46.
+- **Site.** Built with [Quarto](https://quarto.org); charts with [Observable Plot](https://observablehq.com/plot) and [D3](https://d3js.org); formulas with [KaTeX](https://katex.org); text set in [Literata](https://github.com/googlefonts/literata) and [Inter](https://rsms.me/inter/).
+

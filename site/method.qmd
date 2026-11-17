@@ -49,7 +49,7 @@ kappa_table()
 - **BERT** (`bert-base-uncased`): the embedding of the target word itself, averaged over its word pieces, at the layer chosen on Half A among 6, 9 and 12.
 - **Decoder** (`Qwen/Qwen3-1.7B`): the hidden state at the target word's last piece, at the layer chosen on Half A among 25%, 50% and 75% depth. A decoder reads left to right, so at the target word it has seen only the words before it; in "The cat is on the mat" that is "The". The state at the sentence's last token, which has read the whole sentence, comes from the same pass and is reported as a supplement.
 - **mpnet** (`all-mpnet-base-v2`): one embedding for the whole sentence.
-- **mpnet-multilingual**: only for the Romanian rung.
+- **mpnet-multilingual**: only for the Romanian test (E8).
 
 The probe is a logistic regression on standardised features, object-mode against literal general predication (A-gen). Idioms and definitions are never used to train it.
 
