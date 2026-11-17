@@ -195,8 +195,10 @@ def export() -> int:
     except OSError:
         commit = "unknown"
     gold = config()["gold"]
+    repo = "https://github.com/aathanor/Rod-and-Caps-Manifolds-in-LLMs"
+    code = f'<a href="{repo}/tree/{commit}">{commit}</a>' if commit else "uncommitted"
     stamp = (f'<div class="run-stamp">Results generated {verdicts["generated"]} · code '
-             f'{commit or "uncommitted"} · labels: {labeler_name()} (all sentences), '
+             f'{code} · labels: {labeler_name()} (all sentences), '
              f'{gold["labeler"]} (gold sample)</div>')
     (SITE / "_stamp.html").write_text(stamp)
     banner = ""

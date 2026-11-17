@@ -44,8 +44,13 @@ website:
         text: Minimal pairs
       - href: data.qmd
         text: Data
+    right:
+      - icon: github
+        href: https://github.com/aathanor/Rod-and-Caps-Manifolds-in-LLMs/tree/final-code/mode_probe
+        aria-label: Code on GitHub
+        text: Code
   page-footer:
-    left: "Florin Cojocariu · 2026"
+    left: "Florin Cojocariu · 2026 · [code on GitHub](https://github.com/aathanor/Rod-and-Caps-Manifolds-in-LLMs/tree/final-code/mode_probe)"
     right: "Sentences from Wikipedia are CC BY-SA 4.0; Project Gutenberg texts are public domain."
 
 format:

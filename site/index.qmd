@@ -4,11 +4,15 @@ subtitle: "Florin Cojocariu · November 2026"
 toc: true
 ---
 
-The pages after this one report an experiment on contextual embeddings. It asks whether a model trained only on text embeds a word differently when the word is used of a present thing and when it is used of no thing in particular. This page says why the question is worth asking, what an answer would show, and how to read the results.
+Take the word "cat". You can use it of the cat on your lap, or of cats in general: "Cats hunt at night." Same word, different use. The experiment reported here asks whether that difference leaves a trace in a language model, a system that has only ever seen text.
+
+It does. Where the model places a word depends on which way the word is being used, and the trace is the same from word to word: a rule learned from sentences about ten nouns sorts sentences about ten other nouns it has never seen. It is not genre, not grammar, and not the concreteness of the surrounding words. It is also thin: present, but not one of the main things that vary when a word changes sentence.
+
+The rest of this page says why that is worth knowing and how to read the result pages.
 
 ## The result in one picture
 
-A probe trained on ten words sorts sentences about ten other words. Object-mode uses (dark blue) fall to the left, general statements (orange) to the right; idioms (grey) sit between.
+Each dot is one sentence containing "dog", "fork", "tomato" or one of seven other nouns. Its position comes from a simple rule, a single straight cut through the model's representations, worked out only from sentences about ten *different* nouns ("cat", "hammer", "apple" and others). Sentences about one particular thing (dark blue) land on the left; general statements (orange) land on the right; idioms (grey) fall in between. The rule never saw these ten words and still sorts them.
 
 ```{python}
 from _site import chart

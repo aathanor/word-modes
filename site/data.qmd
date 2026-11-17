@@ -2,7 +2,7 @@
 title: "Data and code"
 ---
 
-Every number on this site is read from the files below, which the pipeline writes. Code: the `mode_probe` package in [Rod-and-Caps-Manifolds-in-LLMs](https://github.com/aathanor/Rod-and-Caps-Manifolds-in-LLMs), branch `final-code`. To rerun: `python -m mode_probe.run_all --labels-ready`.
+Every number on this site is read from the files below, which the pipeline writes. Code: the [`mode_probe` package](https://github.com/aathanor/Rod-and-Caps-Manifolds-in-LLMs/tree/final-code/mode_probe) in the [Rod-and-Caps-Manifolds-in-LLMs](https://github.com/aathanor/Rod-and-Caps-Manifolds-in-LLMs) repository, branch `final-code`; this site's source is in [`site/`](https://github.com/aathanor/Rod-and-Caps-Manifolds-in-LLMs/tree/final-code/site). To rerun: `python -m mode_probe.run_all --labels-ready`.
 
 Sentences from Wikipedia are licensed CC BY-SA 4.0; each sentence links to its article in the [sentence explorer](explorer.qmd). Project Gutenberg texts are in the public domain.
 
