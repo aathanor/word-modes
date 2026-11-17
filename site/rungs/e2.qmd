@@ -1,5 +1,5 @@
 ---
-title: "2. Shared direction"
+title: "Shared direction (E2)"
 ---
 
 ```{python}

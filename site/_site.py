@@ -23,7 +23,7 @@ DATA = ROOT / "data"
 NAMES = {"bert": "BERT", "decoder": "Decoder", "decoder_final": "Decoder, final token",
          "mpnet": "mpnet", "multilingual": "mpnet-multilingual", "all": "all models"}
 QUESTIONS = {
-    "e1": "Without labels, is the mode one of the main directions along which a word's embeddings vary?",
+    "e1": "Without labels, is the mode one of the main directions along which a word's embeddings vary, or a thinner signal a probe has to be told to find?",
     "e2": "Does a probe trained on some words separate the modes in words it never saw?",
     "e3": "Does the direction carry over from encyclopedic text to fiction and back?",
     "e4": "Does it beat a surface-grammar classifier, and survive pairs with the same surface form?",
@@ -67,23 +67,47 @@ def sections():
     return _json("sections.json") or {}
 
 
-def _vclass(v: str) -> str:
+def _vclass(v: str, key: str | None = None) -> str:
     v = (v or "").lower()
     if "underpowered" in v:
         return "under"
     cls = ("supported" if v.startswith("supported") else "mixed" if v.startswith("mixed")
            else "not" if v.startswith("not supported") else "none")
-    if "underpowered" in v:
-        cls += " under"
+    if key == "e1" and cls == "not":
+        cls = "thin"      # the mark is there (E2) but not among the main directions: a description, not a failure
     return cls
 
 
-def badge(v: str) -> str:
-    return f'<span class="verdict {_vclass(v)}">{html.escape(v or "not run")}</span>'
+E1_WORD = {"supported": "prominent", "mixed": "partly prominent", "not supported": "not prominent"}
+
+
+def _vword(v: str, key: str | None = None) -> str:
+    if key == "e1":
+        for k, w in E1_WORD.items():
+            if (v or "").startswith(k):
+                return w
+    return v or "not run"
+
+
+def badge(v: str, key: str | None = None) -> str:
+    return f'<span class="verdict {_vclass(v, key)}">{html.escape(_vword(v, key))}</span>'
+
+
+# The argument as it is told: first whether there is a mark, then whether it is something
+# else, then whether it behaves as a mark of the mode should, and last how visible it is
+# without labels. E-numbers are the experiment ids of the summary and the data files; the
+# pipeline runs them in id order.
+STEPS = [
+    ("Is there a mark?", ["e2"]),
+    ("Is it something else?", ["e3", "e4", "e5"]),
+    ("Does it behave as a mark of the mode should?", ["e7", "e6"]),
+    ("How visible is it without labels?", ["e1"]),
+    ("Beyond English", ["e8"]),
+]
 
 
 MAIN = ["bert", "decoder", "mpnet"]
-ICON = {"supported": "✓", "mixed": "~", "not": "✕", "none": "–", "under": "?"}
+ICON = {"supported": "✓", "mixed": "~", "not": "✕", "none": "–", "under": "?", "thin": "◐"}
 
 
 def _csv(name):
@@ -103,8 +127,12 @@ def headline(key: str) -> str:
     """One line per rung, computed from the result tables."""
     try:
         if key == "e1":
-            t = _csv("e1_prominence.csv"); t = t[(t.word == "(pooled)") & t.model.isin(MAIN)]
-            return f"best unlabeled direction: AUC {_rng(t.best_auc)} (the bar is 0.8)"
+            t = _csv("e1_prominence.csv")
+            w = t[(t.word != "(pooled)") & t.model.isin(MAIN)]
+            top = [int((w[w.model == m].rank_first_aligned <= 3).sum()) for m in MAIN if m in set(w.model)]
+            p = t[(t.word == "(pooled)") & t.model.isin(MAIN)]
+            return (f"in {_rng(top, '{:.0f}')} of 20 words one of the first three unlabeled directions separates the modes · "
+                    f"pooled over words the best reaches AUC {_rng(p.best_auc)}, under the 0.8 bar")
         if key == "e2":
             t = _csv("e2_transfer.csv"); t = t[t.model.isin(MAIN)]
             auc = [(a + b) / 2 for a, b in zip(t["A->B auc"], t["B->A auc"])]
@@ -134,52 +162,64 @@ def headline(key: str) -> str:
     return ""
 
 
-def _status(v: str) -> str:
-    return _vclass(v).split()[0]
+def _status(v: str, key: str | None = None) -> str:
+    return _vclass(v, key).split()[0]
+
+
+def _per_model(r: dict, models: list[str]) -> dict:
+    if not r["run"]:
+        return {m: "not run" for m in models}
+    if r["id"] == "e7":
+        return {m: r["verdicts"]["all"] for m in models}
+    if r["id"] == "e6":
+        return {m: r["detail"][m]["definitions"] for m in models if m in r["detail"]}
+    if r["id"] == "e8":
+        return {m: r["verdicts"].get("multilingual", "not run") for m in models}
+    return {m: r["verdicts"].get(m, "") for m in models}
+
+
+STEP_WORD = {"supported": "holds", "mixed": "holds in part", "not": "does not hold", "none": "not run",
+             "under": "too little data to decide", "thin": "present, not prominent"}
 
 
 def ladder() -> None:
-    """The ladder, drawn: rung 1 at the bottom, a glyph per model on each rung."""
+    """The argument, drawn: the tests in the order the argument needs them, grouped by the
+    question each group answers, a glyph per model on each. Not a ladder of difficulty."""
     V = verdicts()
     if not V:
         _out("*Results are not available yet.*")
         return
     models = [m for m in MAIN if m in V["models"]]
+    by_id = {r["id"]: r for r in V["rungs"]}
     head = "".join(f'<span class="vl-m">{NAMES[m]}</span>' for m in models)
-    rungs = []
-    for i, r in enumerate(V["rungs"], 1):
-        if not r["run"]:
-            per = {m: "not run" for m in models}
-        elif r["id"] == "e7":
-            per = {m: r["verdicts"]["all"] for m in models}
-        elif r["id"] == "e6":
-            per = {m: r["detail"][m]["definitions"] for m in models if m in r["detail"]}
-        elif r["id"] == "e8":
-            per = {m: r["verdicts"].get("multilingual", "not run") for m in models}
-        else:
-            per = {m: r["verdicts"].get(m, "") for m in models}
-        sts = [_status(per.get(m, "")) for m in models]
-        overall = ("supported" if all(s == "supported" for s in sts) else "none" if all(s == "none" for s in sts)
-                   else "under" if all(s in ("under", "none") for s in sts)
-                   else "not" if all(s in ("not", "none") for s in sts) else "mixed")
-        glyphs = "".join(
-            f'<span class="g g-{_status(per.get(m, ""))}" title="{NAMES[m]}: {html.escape(per.get(m, ""))}">'
-            f'{ICON[_status(per.get(m, ""))]}</span>' for m in models)
-        word = {"supported": "holds", "mixed": "holds in part", "not": "does not hold", "none": "not run",
-                "under": "too little data to decide"}[overall]
-        rungs.append(
-            f'<a class="vl-rung st-{overall}" href="rungs/{r["id"]}.html">'
-            f'<span class="vl-n">{i}</span>'
-            f'<span class="vl-bar"><span class="vl-g">{glyphs}</span></span>'
-            f'<span class="vl-t"><strong>{html.escape(r["title"])}</strong> <em class="vl-w">{word}</em>'
-            f'<span class="vl-q">{html.escape(QUESTIONS[r["id"]])}</span>'
-            f'<span class="vl-h">{html.escape(headline(r["id"]))}</span></span></a>')
-    _out('<div class="vladder"><div class="vl-head"><span></span><span class="vl-ms">' + head +
-         '</span><span class="vl-key">✓ supported · ~ mixed · ✕ not supported · ? too little data · – not run</span></div>' +
-         "".join(reversed(rungs)) + '<div class="vl-ground"><span class="vl-base"></span><span class="vl-gt">'
-         'rung 1 is the first step: each rung assumes the ones below it</span></div></div>')
+    out = ['<div class="vladder"><div class="vl-head"><span></span><span class="vl-ms">' + head +
+           '</span><span class="vl-key">✓ holds · ~ in part · ✕ does not hold · ◐ present, not prominent · '
+           '? too little data · – not run</span></div>']
+    for group, ids in STEPS:
+        out.append(f'<div class="vl-group">{html.escape(group)}</div>')
+        for key in ids:
+            r = by_id[key]
+            per = _per_model(r, models)
+            sts = [_status(per.get(m, ""), key) for m in models]
+            overall = ("supported" if all(s == "supported" for s in sts) else "none" if all(s == "none" for s in sts)
+                       else "under" if all(s in ("under", "none") for s in sts)
+                       else "thin" if all(s in ("thin", "none") for s in sts)
+                       else "not" if all(s in ("not", "none") for s in sts) else "mixed")
+            glyphs = "".join(
+                f'<span class="g g-{_status(per.get(m, ""), key)}" title="{NAMES[m]}: {html.escape(_vword(per.get(m, ""), key))}">'
+                f'{ICON[_status(per.get(m, ""), key)]}</span>' for m in models)
+            out.append(
+                f'<a class="vl-rung st-{overall}" href="rungs/{key}.html">'
+                f'<span class="vl-n">{key.upper()}</span>'
+                f'<span class="vl-bar"><span class="vl-g">{glyphs}</span></span>'
+                f'<span class="vl-t"><strong>{html.escape(r["title"])}</strong> <em class="vl-w">{STEP_WORD[overall]}</em>'
+                f'<span class="vl-q">{html.escape(QUESTIONS[key])}</span>'
+                f'<span class="vl-h">{html.escape(headline(key))}</span></span></a>')
+    out.append('<div class="vl-ground"><span class="vl-gt">E1–E8 are the experiment ids used in the summary and the '
+               'data files. The pipeline runs them in id order; the argument reads them in this order.</span></div></div>')
+    _out("".join(out))
     if V.get("stops"):
-        _out(f"The ladder stops in {len(V['stops'])} place(s); see [Where the argument stops](stops.qmd).")
+        _out(f"[Where the argument stops](stops.qmd) lists every test that did not hold outright ({len(V['stops'])}).")
 
 
 def chart(name: str, depth: int = 0) -> None:
@@ -203,7 +243,8 @@ def stage_flow(link: bool = True) -> None:
     gw = int((nat.genre == "wikipedia").sum()) if nat is not None else 0
     lc = lab.label.value_counts().to_dict() if lab is not None else {}
     kap = float(k.loc[k.label == "overall", "kappa"].iloc[0]) if k is not None else None
-    held = sum(1 for r in V.get("rungs", []) if r["run"] and all(
+    ran = [r for r in V.get("rungs", []) if r["run"]]
+    held = sum(1 for r in ran if all(
         _status(r["verdicts"].get(m, "")) == "supported" for m in MAIN if m in r.get("verdicts", {})))
     stages = [
         ("words", "Words", "20", "concrete nouns, split in two halves"),
@@ -213,7 +254,8 @@ def stage_flow(link: bool = True) -> None:
         ("gate", "Gate", f"κ {kap:.2f}" if kap else "κ", "agreement with a separately labeled sample; 0.7 required"),
         ("readouts", "Embeddings", "3", "BERT · Decoder · mpnet"),
         ("probe", "Probe", "A → B", "every choice on Half A; Half B tested once"),
-        ("ladder", "Ladder", f"{held}/8", "rungs supported for every model"),
+        ("ladder", "Tests", f"{held} of {len(ran)}", "held outright for every model; the rest held in part, "
+                                                   "had too little data, or describe how visible the mark is"),
     ]
     cards = []
     for anchor, title, big, sub in stages:
@@ -268,10 +310,23 @@ def _strip_verdict_heading(body: str) -> str:
     return "\n".join(l for l in lines if not l.startswith("*Question.*"))
 
 
+INTRO = {
+    "e1": "This test describes the mark rather than testing for it. E2 shows the mark is there and shared across "
+          "words; E1 asks how large it is next to everything else that varies in a word's embeddings. The bar was "
+          "set before the run: the mode counts as prominent if one of the first three unlabeled directions "
+          "separates object-mode from general statements at AUC ≥ 0.8, pooled over all words. For some words (three to "
+          "eleven of twenty, depending on the model) it is among the first three things that vary; pooled over "
+          "words it is visible but under the bar. The mark "
+          "is real, and thin. That is why the rest of the argument uses a probe, which is told what to look for.",
+}
+
+
 def rung(key: str, interactive: str | None = None) -> None:
-    """A rung page: question, verdict line, headline chart, then the summary section and the paper figure."""
+    """A result page: question, verdict line, headline chart, then the summary section and the paper figure."""
     S, V = sections(), verdicts()
     _out(f'<p class="lead-question">{html.escape(QUESTIONS[key])}</p>')
+    if key in INTRO:
+        _out(INTRO[key])
     entry = next((r for r in V.get("rungs", []) if r["id"] == key), None)
     if entry is None or not entry["run"] or key not in S:
         _out("This rung was not run. " + (
@@ -285,13 +340,14 @@ def rung(key: str, interactive: str | None = None) -> None:
         badges = " ".join(f'<span class="rb">{NAMES[m]}</span> {badge(entry["detail"][m]["definitions"])}'
                           for m in MAIN if m in entry.get("detail", {}))
     else:
-        badges = " ".join(f'<span class="rb">{NAMES[m]}</span> {badge(verd.get(m, ""))}' for m in MAIN if m in verd)
+        badges = " ".join(f'<span class="rb">{NAMES[m]}</span> {badge(verd.get(m, ""), key)}' for m in MAIN if m in verd)
     _out(f'<div class="rung-verdict">{badges}<div class="rung-h">{html.escape(headline(key))}</div></div>')
     if key in ("e1", "e2", "e3", "e4", "e5", "e6", "e7"):
         chart(key, depth=1)
     if interactive:
         _out("## Every sentence\n\n" + interactive)
     body = _strip_verdict_heading(S[key]["body"]).replace("`results/", "`data/")
+    body = body.replace("rungs 3–5", "E3–E5").replace("rung 2", "E2")
     _out("## The numbers\n\n" + body)
     fig = FIGS[key]
     if (ROOT / "figures" / f"{fig}.svg").exists():

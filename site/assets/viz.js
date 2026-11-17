@@ -135,7 +135,7 @@
                           stroke: "white", strokeWidth: 1, tip: true, title: d => `all words pooled, ${MODEL[d.model].name}: AUC ${f2(d.best_auc)}`})
       ]
     }));
-    put(el, legend(ms), chart, `<p class="viz-note">The rung asks for a direction found without labels that separates the modes at AUC ≥ 0.8 (green zone). Pooled over all words, none does.</p>`);
+    put(el, legend(ms), chart, `<p class="viz-note">Each dot: the best of a word's first ten unlabeled directions, scored by how well it separates object-mode from general statements. In the green zone the mode is a main direction of that word's variation. Pooled over all words (bottom row), the best direction is clearly above chance and under the bar: the mark is there, and thin.</p>`);
   };
 
   charts.e2 = (el, v) => {

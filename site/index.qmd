@@ -65,25 +65,39 @@ from _site import stage_flow
 stage_flow()
 ```
 
-The results are reported as a ladder. Each rung answers one question and depends on the ones before it.
+The results answer four questions in turn. Each test is one experiment, E1 to E8; the numbers are the ids used in the summary and the data files, not the order of the argument.
 
-- **Prominence.** Without labels, is the mode one of the main directions along which a word's embeddings vary? This is the rung that supports "extracted from the sediment" most directly, since nothing told the model, or the analysis, what to look for.
-- **Shared direction.** Does a probe trained on some words separate the modes in words it never saw? If each word only had its own two clusters, it would not.
-- **Not genre.** Does the direction carry over from encyclopedic text to fiction and back? Encyclopedias are mostly abstract-mode and novels mostly object-mode, so a genre detector would fail here.
-- **Not grammar.** Does the direction do better than a classifier that sees only determiners, number and tense, and does it survive pairs of sentences with the same surface form ("The cat is on the mat" and "The cat is a solitary hunter")?
-- **Not concreteness.** Does it survive when the concreteness of the other words in the sentence is removed?
-- **Predictions.** Definitions are meaning with no occasion at all, so they should sit at the far abstract end of a direction that never saw them. Where idioms fall is an open question.
-- **Agreement across models.** Do an encoder, a decoder and a sentence model order the same sentences in the same way?
-- **Not English syntax** (if Romanian data is supplied). Does the direction learned on English carry over to Romanian, which marks definiteness differently?
+**Is there a mark?**
+
+- **Shared direction (E2).** Does a probe trained on some words separate the modes in words it never saw? If each word only had its own two clusters, it would not.
+
+**Is it something else?**
+
+- **Not genre (E3).** Does the direction carry over from encyclopedic text to fiction and back? Encyclopedias are mostly abstract-mode and novels mostly object-mode, so a genre detector would fail here.
+- **Not grammar (E4).** Does the direction do better than a classifier that sees only determiners, number and tense, and does it survive pairs of sentences with the same surface form ("The cat is on the mat" and "The cat is a solitary hunter")?
+- **Not concreteness (E5).** Does it survive when the concreteness of the other words in the sentence is removed?
+
+**Does it behave as a mark of the mode should?**
+
+- **Agreement across models (E7).** Do an encoder, a decoder and a sentence model order the same sentences in the same way?
+- **Predictions (E6).** Definitions are meaning with no occasion at all, so they should sit at the far abstract end of a direction that never saw them. Where idioms fall is an open question.
+
+**How visible is it without labels?**
+
+- **Prominence (E1).** Is the mode one of the main directions along which a word's embeddings vary, with nothing telling the model or the analysis what to look for? This is the test that would support "extracted from the sediment" most directly. It is also the most demanding: a mark can be real, shared and thin. It comes last because it describes the mark the other tests establish.
+
+**Beyond English**
+
+- **Not English syntax (E8)** (if Romanian data is supplied). Does the direction learned on English carry over to Romanian, which marks definiteness differently?
 
 ## How to read the results
 
 ::: {.proposed-edit}
-The result pages follow the ladder in that order. Each states the question, the numbers on the full set and on the separately labeled sample, and a verdict per model. A closing section lists every rung that failed or had too little data to decide. The claim stands as far as the ladder holds and no further. If the probe does not beat the grammar classifier, the mark is carried mainly by grammar, and the paper becomes a paper about how grammar records the mode.
-[Proposed change. Original: "… the numbers on the full set and on the hand-labeled sample …"]{.was}
+The result pages follow the four questions in that order. Each states the question, the numbers on the full set and on the separately labeled sample, and a verdict per model. A closing section lists every test that did not hold outright or had too little data to decide. The claim stands as far as the tests hold and no further. If the probe does not beat the grammar classifier, the mark is carried mainly by grammar, and the paper becomes a paper about how grammar records the mode.
+[Proposed change. Original: "The result pages follow the ladder in that order. … the numbers on the full set and on the hand-labeled sample … every rung that failed … as far as the ladder holds"]{.was}
 :::
 
-## The ladder
+## The argument, test by test
 
 ```{python}
 from _site import ladder, scripts

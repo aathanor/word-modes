@@ -1,5 +1,5 @@
 ---
-title: "6. Predictions"
+title: "Predictions (E6)"
 ---
 
 ```{python}

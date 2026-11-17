@@ -1,5 +1,5 @@
 ---
-title: "8. Not English syntax"
+title: "Not English syntax (E8)"
 ---
 
 ```{python}

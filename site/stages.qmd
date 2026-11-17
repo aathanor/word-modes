@@ -1,6 +1,6 @@
 ---
 title: "How it was built"
-subtitle: "From twenty words to an eight-rung ladder, one stage at a time"
+subtitle: "From twenty words to the tests, one stage at a time"
 toc: true
 ---
 
@@ -65,9 +65,9 @@ halves()
 
 Each result is checked against what chance would give. The probe is retrained 200 times with the labels shuffled within each word; the real result must beat the 95th percentile of those shuffled runs. It must also beat a classifier that sees only grammar (determiner, number, tense, pronouns, length, position), survive removing concreteness, and hold across genres.
 
-## 7. The ladder {#ladder}
+## 7. The tests {#ladder}
 
-The results are read as a ladder: each rung answers one question and depends on the ones below it.
+The experiments are numbered E1 to E8 and run in that order, from the most demanding claim down. They are read in the order the argument needs them: first whether there is a mark at all, then whether it is something else, then whether it behaves as a mark of the mode should, and last how visible it is with nothing pointing at it.
 
 ```{python}
 from _site import ladder, scripts

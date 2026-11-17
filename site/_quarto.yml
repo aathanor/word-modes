@@ -26,15 +26,15 @@ website:
         text: How it was built
       - href: method.qmd
         text: Method
-      - text: Ladder
+      - text: Results
         menu:
-          - rungs/e1.qmd
           - rungs/e2.qmd
           - rungs/e3.qmd
           - rungs/e4.qmd
           - rungs/e5.qmd
-          - rungs/e6.qmd
           - rungs/e7.qmd
+          - rungs/e6.qmd
+          - rungs/e1.qmd
           - rungs/e8.qmd
           - text: "---"
           - stops.qmd

@@ -92,6 +92,29 @@ def quick_subset(nat: pd.DataFrame, per_word: int) -> pd.DataFrame:
     return pd.concat(keep).sort_index().reset_index(drop=True)
 
 
+def save_results(ctx, res: dict, meta: dict) -> None:
+    """Everything summary.write needs, so wording changes do not need a rerun."""
+    import pickle
+
+    with open(rdir() / "run_results.pkl", "wb") as f:
+        pickle.dump({"models": ctx.models, "sel": ctx.sel, "res": res, "meta": meta}, f)
+
+
+def rewrite_summary() -> int:
+    import pickle
+    from types import SimpleNamespace
+
+    p = rdir() / "run_results.pkl"
+    if not p.exists():
+        print(f"[summary] {p} not found; it is written at the end of a full run", file=sys.stderr)
+        return 1
+    with open(p, "rb") as f:
+        d = pickle.load(f)
+    S.write(SimpleNamespace(models=d["models"], sel=d["sel"]), d["res"], d["meta"])
+    print(f"[summary] rewrote {rdir() / 'summary.md'} from {p}")
+    return 0
+
+
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(prog="python -m mode_probe.run_all")
     ap.add_argument("--labels-ready", action="store_true")
@@ -101,10 +124,14 @@ def main(argv=None) -> int:
     ap.add_argument("--smoke", action="store_true")
     ap.add_argument("--decoder", default=None)
     ap.add_argument("--device", default=None)
+    ap.add_argument("--summary-only", action="store_true",
+                    help="rewrite summary.md, sections.json and verdicts.json from the last run's saved results")
     args = ap.parse_args(argv)
 
     ensure_dirs()
     set_seed()
+    if args.summary_only:
+        return rewrite_summary()
     if args.decoder:
         config()["models"]["decoder"]["name"] = args.decoder
 
@@ -235,6 +262,7 @@ def main(argv=None) -> int:
                            ", ".join(f"{k} {counts.get(k, 0)}" for k in LABELS) +
                            f". Gold: {(nat.gold != '').sum()} sentences. {kappa_line}")}
     S.write(ctx, res, meta)
+    save_results(ctx, res, meta)
     sc = nat[["sid", "word", "genre", "half", "source_id", "label", "gold"]].copy()
     for m in ctx.models:
         sc[f"{m}_swap"] = ctx.scores[m]["swap"]

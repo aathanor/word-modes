@@ -1,6 +1,6 @@
 {
   "tag": null,
-  "generated": "2026-11-16T22:08:34",
+  "generated": "2026-11-17T08:54:05",
   "models": [
     "bert",
     "decoder",
@@ -148,10 +148,10 @@
   ],
   "stops": [
     "No human gold set: the gold labels come from a second model (Claude Opus 5.5 (claude-opus-5-5), blind to the model labels; no human labels), so \u03ba measures agreement between two models, not between a model and a person.",
-    "E1 (BERT): not supported \u2014 the mode is not among the top three directions of variation.",
-    "E1 (Decoder): not supported \u2014 the mode is not among the top three directions of variation.",
-    "E1 (mpnet): not supported \u2014 the mode is not among the top three directions of variation.",
-    "E1 (Decoder, final-token readout (supplementary)): not supported \u2014 the mode is not among the top three directions of variation.",
+    "E1 (BERT): not prominent \u2014 the mode is not among the top three unlabeled directions of variation pooled over words; see E2 for whether it is there.",
+    "E1 (Decoder): not prominent \u2014 the mode is not among the top three unlabeled directions of variation pooled over words; see E2 for whether it is there.",
+    "E1 (mpnet): not prominent \u2014 the mode is not among the top three unlabeled directions of variation pooled over words; see E2 for whether it is there.",
+    "E1 (Decoder, final-token readout (supplementary)): not prominent \u2014 the mode is not among the top three unlabeled directions of variation pooled over words; see E2 for whether it is there.",
     "E4 (Decoder): mixed.",
     "E6 definitions (BERT): not supported (underpowered).",
     "E6 definitions (Decoder): not supported (underpowered).",

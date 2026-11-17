@@ -1,5 +1,5 @@
 ---
-title: "7. Same direction across models"
+title: "Same direction across models (E7)"
 ---
 
 ```{python}

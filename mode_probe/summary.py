@@ -95,16 +95,19 @@ def write(ctx, res: dict, meta: dict) -> str:
     L.append(_table(["model", "pooled rank", "its variance share", "best pooled PC AUC",
                      f"words with rank ≤ {V['e1_supported_rank']}", "words with none in top 10",
                      "gold pooled rank"], rows) + "\n")
-    L.append("*Verdict* (supported: pooled rank ≤ "
-             f"{V['e1_supported_rank']}; mixed: within the first 10; not supported: none):\n\n"
-             + _verdict_lines(res["e1"]["verdicts"], models) + "\n")
+    e1w = {"supported": "prominent", "mixed": "partly prominent", "not supported": "not prominent"}
+    e1v = {m: next((w for k, w in e1w.items() if v.startswith(k)), v) for m, v in res["e1"]["verdicts"].items()}
+    L.append("*Verdict* (prominent: pooled rank ≤ "
+             f"{V['e1_supported_rank']}; partly prominent: within the first 10; not prominent: none):\n\n"
+             + _verdict_lines(e1v, models) + "\n")
     L.append("*What it does not show.* A mode-aligned component can be prominent because mode "
              "co-varies with something larger (genre, sentence type); rungs 3–5 test that. A "
-             "non-prominent mode can still be linearly readable (rung 2).\n")
+             "non-prominent mode can still be linearly readable (rung 2): 'not prominent' says how "
+             "large the mark is next to everything else that varies, not whether it is there.\n")
     for m in models:
         if not res["e1"]["verdicts"][m].startswith("supported"):
-            stops.append(f"E1 ({NAMES.get(m, m)}): {res['e1']['verdicts'][m]} — the mode is not among "
-                         "the top three directions of variation.")
+            stops.append(f"E1 ({NAMES.get(m, m)}): {e1v[m]} — the mode is not among the top three "
+                         "unlabeled directions of variation pooled over words; see E2 for whether it is there.")
 
     # ---------------------------------------------------------------- E2
     p = res["e2"]["pooled"]

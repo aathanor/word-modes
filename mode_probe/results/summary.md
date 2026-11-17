@@ -1,6 +1,6 @@
 # Mode-of-use probe: summary
 
-Generated 2026-11-16 22:08. The claim tested is that the embedding carries a mark of the mode of use: the text sediment carries a mark of the mode of use, and models trained on it pick that mark up. Nothing below says that a model has the distinction or understands anything.
+Generated 2026-11-17 08:54. The claim tested is that the embedding carries a mark of the mode of use: the text sediment carries a mark of the mode of use, and models trained on it pick that mark up. Nothing below says that a model has the distinction or understands anything.
 
 **Data.** 5900 natural sentences, 20 words, 3000 Wikipedia and 2900 fiction; 200 minimal pairs.
 
@@ -30,14 +30,14 @@ Rank = first principal component whose score separates O from A-gen with AUC ≥
 | mpnet | n/a | n/a | 0.773 | 11/20 | 9/20 | n/a |
 | Decoder, final-token readout (supplementary) | n/a | n/a | 0.744 | 11/20 | 9/20 | n/a |
 
-*Verdict* (supported: pooled rank ≤ 3; mixed: within the first 10; not supported: none):
+*Verdict* (prominent: pooled rank ≤ 3; partly prominent: within the first 10; not prominent: none):
 
-- BERT: **not supported**
-- Decoder: **not supported**
-- mpnet: **not supported**
-- Decoder, final-token readout (supplementary): **not supported**
+- BERT: **not prominent**
+- Decoder: **not prominent**
+- mpnet: **not prominent**
+- Decoder, final-token readout (supplementary): **not prominent**
 
-*What it does not show.* A mode-aligned component can be prominent because mode co-varies with something larger (genre, sentence type); rungs 3–5 test that. A non-prominent mode can still be linearly readable (rung 2).
+*What it does not show.* A mode-aligned component can be prominent because mode co-varies with something larger (genre, sentence type); rungs 3–5 test that. A non-prominent mode can still be linearly readable (rung 2): 'not prominent' says how large the mark is next to everything else that varies, not whether it is there.
 
 ## 2. Shared direction (E2)
 
@@ -204,10 +204,10 @@ Not run (no `data/romanian_labeled.csv`, or `--romanian` not set).
 ## Where the argument stops
 
 - No human gold set: the gold labels come from a second model (Claude Opus 5.5 (claude-opus-5-5), blind to the model labels; no human labels), so κ measures agreement between two models, not between a model and a person.
-- E1 (BERT): not supported — the mode is not among the top three directions of variation.
-- E1 (Decoder): not supported — the mode is not among the top three directions of variation.
-- E1 (mpnet): not supported — the mode is not among the top three directions of variation.
-- E1 (Decoder, final-token readout (supplementary)): not supported — the mode is not among the top three directions of variation.
+- E1 (BERT): not prominent — the mode is not among the top three unlabeled directions of variation pooled over words; see E2 for whether it is there.
+- E1 (Decoder): not prominent — the mode is not among the top three unlabeled directions of variation pooled over words; see E2 for whether it is there.
+- E1 (mpnet): not prominent — the mode is not among the top three unlabeled directions of variation pooled over words; see E2 for whether it is there.
+- E1 (Decoder, final-token readout (supplementary)): not prominent — the mode is not among the top three unlabeled directions of variation pooled over words; see E2 for whether it is there.
 - E4 (Decoder): mixed.
 - E6 definitions (BERT): not supported (underpowered).
 - E6 definitions (Decoder): not supported (underpowered).
