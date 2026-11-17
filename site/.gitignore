@@ -6,3 +6,6 @@ figures/
 _stamp.html
 _banner.html
 *.quarto_ipynb
+
+/.quarto/
+**/*.quarto_ipynb
