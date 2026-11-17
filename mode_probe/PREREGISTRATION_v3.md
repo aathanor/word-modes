@@ -93,4 +93,22 @@ its original, unchanged rule. If fewer than 20 A-def sentences result, E6 stays 
 
 ## Amendments
 
-None yet.
+**17 November 2026, before any dispersion was computed: the rod/cap test (E11).** Uses the
+version-2 labels of the 5,900 sentences, which already exist; no dispersion, distance or
+clustering had been computed on them.
+
+*Question.* The 2025 study read object-mode uses as a tight "rod" and abstract uses as a spread
+"cap". Is that so once anisotropy and topic are controlled?
+
+*Measure.* Per word and model, embeddings centred on the word's mean and divided by the pooled
+standard deviation of each dimension (anisotropy correction). Dispersion of a class = mean pairwise
+cosine distance within it. Topic: each sentence is embedded by mpnet with the target noun replaced
+by "something", and each word's sentences are split into 8 topic clusters (k-means). The
+topic-controlled dispersion of a class is the mean pairwise distance within (cluster, class),
+averaged over clusters with at least 5 sentences of each class, weighted by the number of pairs.
+The ratio r = dispersion(A-gen) / dispersion(O) is computed raw and topic-controlled.
+
+*Prediction (rod/cap).* Topic-controlled r > 1 in more than half the twenty words, one-sided
+binomial test α = 0.01, for each primary model (BERT; decoder at the word). Verdicts per model:
+*rod and cap* if it holds; *no rod* if r < 1 in more than half the words at α = 0.01; otherwise
+*no difference*. The raw ratio is reported alongside to show how much topic accounts for.
