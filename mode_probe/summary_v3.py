@@ -39,7 +39,9 @@ def write() -> str:
         line = (f"**Labels (version 3).** Claude Opus 5.5 labeled every sentence under "
                 f"[LABELING_v3.md](https://github.com/aathanor/word-modes/blob/main/mode_probe/LABELING_v3.md); "
                 f"the 300-sentence sample was relabeled in separate requests. Gate: κ = {k['kappa']:.2f} "
-                f"(n = {k['n']}, eight labels; required 0.7) — {'passed' if k['passed'] else 'failed'}.")
+                f"(n = {k['n']}, eight labels; required 0.7) — {'passed' if k['passed'] else 'failed'}. Both "
+                f"labelings come from the same model with the same instruction, so this measures how "
+                f"consistently it applies the criterion, not agreement between independent judges.")
         if "qwen_kappa" in k:
             line += f" Cross-check, Qwen3.8 27B against the sample: κ = {k['qwen_kappa']:.2f}."
         L.append(line + "\n")
@@ -66,6 +68,18 @@ def write() -> str:
                           f"{int(r['n P-gen'])} / {int(r['n K-ep'])}", f"**{r.verdict}**"] for _, r in t.iterrows()]) + "\n")
         L.append("Reference predicts P-gen near 0 and K-ep near 1; occasion predicts the reverse. "
                  "BERT and the decoder decide; mpnet is reported.\n")
+        b = t.set_index("model")
+        if {"bert", "decoder"} <= set(b.index):
+            L.append("**What this shows.** Neither reading fits alone. For both primary readouts the "
+                     "disputed cells sit between the poles, so the direction responds to reference and "
+                     f"to occasion. BERT leans toward reference: the episodes about kinds sit near the "
+                     f"general statements ({_f(b.loc['bert', 't(K-ep)'])}), and the habits of particular "
+                     f"things sit nearer the particular episodes ({_f(b.loc['bert', 't(P-gen)'])}), though "
+                     "not as near as the reference reading predicted; that combination was not one of the "
+                     "pre-registered cases, so it gets no verdict. The decoder weighs the two about "
+                     f"equally ({_f(b.loc['decoder', 't(P-gen)'])} and {_f(b.loc['decoder', 't(K-ep)'])}). "
+                     "The claim that the mark is PCF's distinction rather than genericity is not "
+                     "supported as stated; the mark carries both.\n")
         q = V3 / "e9_quads.csv"
         if q.exists():
             tq = pd.read_csv(q)
@@ -108,6 +122,14 @@ def write() -> str:
                         [[NAMES.get(r.model, r.model), _f(r["auc wikipedia"], 3), _f(r["auc fiction"], 3),
                           _f(r["auc encounter"], 3), f"{_f(r['encounter - max(other)'], 3)} [{_f(r['lo'], 3)}, {_f(r['hi'], 3)}]",
                           f"**{r.verdict}**"] for _, r in t.iterrows()]) + "\n")
+        if (t["hi"] < 0).all():
+            L.append("**What this shows.** In all three models the mark is *less* sharp in writing from "
+                     "encounter than in the novels and the encyclopedia, by 0.03–0.04, and the intervals "
+                     "exclude zero. That is the opposite of what the encounter explanation predicts. The "
+                     "pre-registered rule planned for \"stands out\" and for \"the same\", not for "
+                     "\"weaker\", so its verdict is \"inconclusive\"; the data do not support the "
+                     "encounter explanation. One reason may be that diaries and letters mix reports of "
+                     "encounters with reflection, and that the probe was trained on the other two genres.\n")
 
     p = V3 / "e6_rerun.csv"
     if p.exists():
@@ -117,6 +139,9 @@ def write() -> str:
                  "a …\" were collected on purpose and labeled with the rest; the original rule is "
                  "unchanged: definitions should sit beyond the general statements on a direction "
                  "that never saw them.\n")
+        L.append("Collecting on purpose did not help much: Wikipedia sentences that state what a "
+                 "concrete noun is are rare outside each article's first line, and only 8 of the "
+                 "candidates were definitions.\n")
         L.append(_table(["model", "definitions", "beyond the general-statement median", "Mann–Whitney p", "verdict"],
                         [[NAMES.get(r.model, r.model), int(r["n A-def"]), _f(r["fraction beyond A-gen median"]),
                           _f(r["MW p (greater)"], 4), f"**{r.verdict}**"] for _, r in t.iterrows()]) + "\n")

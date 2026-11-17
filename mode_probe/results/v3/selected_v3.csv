@@ -1,0 +1,4 @@
+model,layer,C
+bert,L12,0.01
+decoder,after_L14,0.01
+mpnet,S,0.001

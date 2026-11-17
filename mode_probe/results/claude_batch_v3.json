@@ -1,0 +1,12 @@
+{
+  "id": "msgbatch_01RUbhASK1pwyGDSv3ntGabn",
+  "n": 9488,
+  "submitted": "2026-11-17 16:56:53",
+  "collected": "2026-11-17 17:09:56",
+  "usage": {
+    "in": 1194741,
+    "out": 720978,
+    "cache_read": 20036544
+  },
+  "retried": 0
+}

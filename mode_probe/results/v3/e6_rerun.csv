@@ -1,0 +1,4 @@
+model,n A-def,fraction beyond A-gen median,MW p (greater),verdict
+bert,8,0.875,0.0001864941942114135,supported (underpowered)
+decoder,8,0.75,0.07124774339147144,not supported (underpowered)
+mpnet,8,0.125,0.9805544777537926,not supported (underpowered)

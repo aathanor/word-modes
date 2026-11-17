@@ -1,0 +1,43 @@
+{
+  "gate": {
+    "n": 300,
+    "kappa": 0.9626104161149106,
+    "agreement": 0.9733333333333334,
+    "passed": true
+  },
+  "e9": {
+    "bert": "no verdict (pattern outside the pre-registered cases)",
+    "decoder": "both",
+    "mpnet": "both"
+  },
+  "quads": {
+    "bert": "reference larger",
+    "decoder": "neither",
+    "mpnet": "neither"
+  },
+  "quads_label_agreement": 0.965,
+  "e10": {
+    "bert": "inconclusive",
+    "decoder": "inconclusive",
+    "mpnet": "inconclusive"
+  },
+  "e6": {
+    "bert": "supported (underpowered)",
+    "decoder": "not supported (underpowered)",
+    "mpnet": "not supported (underpowered)"
+  },
+  "selected": {
+    "bert": {
+      "layer": "L12",
+      "C": 0.01
+    },
+    "decoder": {
+      "layer": "after_L14",
+      "C": 0.01
+    },
+    "mpnet": {
+      "layer": "S",
+      "C": 0.001
+    }
+  }
+}

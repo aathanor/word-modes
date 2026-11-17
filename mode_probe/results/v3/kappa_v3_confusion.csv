@@ -1,0 +1,8 @@
+label_gold,A-idiom,A-simile,K-ep,K-gen,P-ep,P-gen,X
+A-idiom,17,0,0,0,0,0,0
+A-simile,0,9,0,0,0,0,0
+K-ep,0,0,7,0,0,0,0
+K-gen,0,0,0,34,0,2,0
+P-ep,0,0,1,1,136,1,0
+P-gen,0,0,0,0,2,25,0
+X,0,0,0,0,0,1,64

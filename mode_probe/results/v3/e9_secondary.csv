@@ -1,0 +1,16 @@
+model,probe,A->B auc,value
+bert,reference,0.9393585043988271,
+bert,occasion,0.9121983787978094,
+bert,E2 (v2 labels),0.9277255954377726,
+bert,"cos(reference, E2)",,0.7425430049232337
+bert,"cos(occasion, E2)",,0.6134026489221435
+decoder,reference,0.928848973607038,
+decoder,occasion,0.9418576400659933,
+decoder,E2 (v2 labels),0.9355814095331036,
+decoder,"cos(reference, E2)",,0.5885720679456646
+decoder,"cos(occasion, E2)",,0.5226825115035606
+mpnet,reference,0.9129692082111437,
+mpnet,occasion,0.9316008241613367,
+mpnet,E2 (v2 labels),0.9250602299411425,
+mpnet,"cos(reference, E2)",,0.8866675153275299
+mpnet,"cos(occasion, E2)",,-0.5087198966801135
