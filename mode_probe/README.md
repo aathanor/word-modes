@@ -27,7 +27,8 @@ Models: `bert-base-uncased` (target token, mean of wordpieces), `Qwen/Qwen3-1.7B
 
 Environment: `conda activate mode-probe` (Python 3.11; torch for ROCm/CUDA/CPU,
 transformers, sentence-transformers, scikit-learn, statsmodels, spaCy with
-`en_core_web_sm`, pyarrow). Model labels come from a local Ollama model (`config.yaml`).
+`en_core_web_sm`, pyarrow). Model labels come from Claude Opus 5.5 through the Message Batches API (`label_claude.py`,
+`ANTHROPIC_API_KEY`); a local Ollama model relabels everything as a cross-check (`config.yaml`).
 Run from the repository root.
 
 ```
@@ -40,6 +41,15 @@ python -m mode_probe.run_all --labels-ready --romanian   # adds E8 if data/roman
 python -m mode_probe.run_all --labels-ready --quick      # BERT + mpnet, 50 sentences per word
 python -m mode_probe.run_all --smoke          # code check on random labels (results/smoke/)
 python -m pytest mode_probe/tests
+```
+
+Human labels for the gold sample go in `data/gold_human_to_label.xlsx`: the label column
+has a drop-down of the five labels, the target noun is in bold, and the second sheet
+summarises the criterion. The sheet shows no earlier labels. When some rows are filled:
+
+```
+python -m mode_probe.human --report   # κ against Claude, Qwen and the first gold labels
+python -m mode_probe.human --sheet    # rebuild the sheet (refuses if it already has labels)
 ```
 
 `--decoder NAME` replaces the decoder; `--device cpu` forces CPU.
