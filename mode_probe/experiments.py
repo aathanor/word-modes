@@ -246,7 +246,8 @@ def e3_genre(ctx: Ctx, e2: dict) -> dict:
         for gname, gm in (("wiki", wiki), ("fiction", fic)):
             # same-genre baseline over all words, folds grouped by source document
             idx = np.where(gm & binm)[0]
-            groups = ctx.nat["source_id"].to_numpy()[idx]
+            # one group per document: Wikipedia ids carry the article title after "wiki:" or "wikidump:"
+            groups = ctx.nat["source_id"].str.replace(r"^wiki(?:dump)?:", "wiki:", regex=True).to_numpy()[idx]
             y = P.y_of(ctx.nat["label"].to_numpy()[idx])
             oof = np.full(len(idx), np.nan)
             n_splits = min(5, len(np.unique(groups)))

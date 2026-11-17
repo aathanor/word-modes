@@ -1,0 +1,91 @@
+sid,reason,replaced_by,word,new_source,claude_label,qwen_label
+s00036,article not recovered,s05927,cat,wikidump:Bakeneko,O,O
+s00045,article not recovered,s05929,cat,wikidump:List of Heroes characters,O,O
+s00063,article not recovered,s05931,cat,wikidump:Aja West and Cheeba,O,O
+s00068,article not recovered,s05933,cat,wikidump:Feline calicivirus,A-gen,A-gen
+s00085,article not recovered,s05935,cat,wikidump:Anthemis cotula,A-gen,A-gen
+s00095,article not recovered,s05938,cat,wikidump:Cat communication,A-gen,A-gen
+s00125,article not recovered,s05942,cat,wikidump:Efficient coding hypothesis,X,X
+s00127,article not recovered,s05944,cat,wikidump:Takangaroa Island,A-gen,A-gen
+s00147,article not recovered,s05946,cat,wikidump:Banjo the Woodpile Cat,O,O
+s00158,article not recovered,s05951,hammer,wikidump:Anthroposophy,X,X
+s00171,article not recovered,s05954,hammer,wikidump:Hammer (firearms),A-idiom,A-idiom
+s00207,article not recovered,s05956,hammer,wikidump:Katherine Walker,X,X
+s00215,article not recovered,s05957,hammer,wikidump:Flag of the Karelo-Finnish Soviet Socialist Republic,X,X
+s00303,article not recovered,s05900,apple,wikidump:Cucumis myriocarpus,X,X
+s00320,article not recovered,s05901,apple,wikidump:Kūčios,A-gen,O
+s00331,article not recovered,s05902,apple,wikidump:Grapefruit–drug interactions,X,X
+s00336,article not recovered,s05903,apple,wikidump:Paula Red,A-gen,A-gen
+s00338,article not recovered,s05904,apple,wikidump:Winesap,A-gen,X
+s00351,article not recovered,s05906,apple,wikidump:Breidecker,X,X
+s00367,article not recovered,s05907,apple,wikidump:Bricherasio,A-gen,X
+s00385,article not recovered,s05909,apple,wikidump:Edmund Allen Meredith,X,X
+s00387,article not recovered,s05910,apple,wikidump:William Miller (engraver),X,X
+s00395,article not recovered,s05912,apple,wikidump:Fruity Frank,X,X
+s00400,article not recovered,s05914,apple,wikidump:Buria,A-gen,X
+s00404,article not recovered,s05915,apple,wikidump:Apple Hill,O,O
+s00425,article not recovered,s05916,apple,wikidump:Dark Ages (1991 video game),O,O
+s00441,article not recovered,s05917,apple,wikidump:Tafelspitz,A-gen,X
+s00443,article not recovered,s05918,apple,wikidump:Cornish Gilliflower,A-gen,A-gen
+s00444,article not recovered,s05919,apple,wikidump:Vlaai,X,X
+s01699,article not recovered,s05948,fork,wikidump:New York State Route 173,X,X
+s01800,article not recovered,s05976,tomato,wikidump:Lecsó,X,X
+s01830,article not recovered,s05979,tomato,wikidump:Culture of Pittsburgh,X,X
+s01833,article not recovered,s05980,tomato,wikidump:Vegetable,A-gen,A-gen
+s01838,article not recovered,s05981,tomato,wikidump:Palminópolis,A-gen,X
+s01856,article not recovered,s05982,tomato,wikidump:Phospholipase D,A-gen,X
+s02369,article not recovered,s05947,cow,wikidump:Hamilton Zoo,O,X
+s00371,over cap: Apple sauce,s05908,apple,wikidump:Internet video,X,X
+s00339,over cap: Apple sauce,s05905,apple,wikidump:Midelt,A-gen,A-gen
+s00390,over cap: List of Apple Inc. media events,s05911,apple,wikidump:Typhoon Zeb,O,O
+s00398,over cap: List of Apple Inc. media events,s05913,apple,wikidump:Cyanide,A-gen,X
+s00092,over cap: List of individual cats,s05937,cat,wikidump:No-kill shelter,A-gen,A-gen
+s00027,over cap: List of individual cats,s05926,cat,wikidump:Face to Face (Siouxsie and the Banshees song),A-idiom,A-idiom
+s00082,over cap: List of individual cats,s05934,cat,wikidump:Fel d 1,A-gen,A-gen
+s00098,over cap: List of individual cats,s05939,cat,wikidump:Catalan language,X,X
+s00015,over cap: List of individual cats,s05923,cat,wikidump:Sardinian wildcat,A-def,A-def
+s00126,over cap: List of individual cats,s05943,cat,wikidump:Cytauxzoonosis,A-gen,A-gen
+s00043,over cap: List of individual cats,s05928,cat,wikidump:Alabama beach mouse,A-gen,A-gen
+s00001,over cap: List of individual cats,s05920,cat,wikidump:Naomi Hall,A-gen,O
+s00002,over cap: List of individual cats,s05921,cat,wikidump:Cat intelligence,X,A-gen
+s00047,over cap: List of individual cats,s05930,cat,wikidump:Growltiger's Last Stand,O,O
+s00016,over cap: List of individual cats,s05924,cat,wikidump:Bill Joy,X,X
+s00004,over cap: List of individual cats,s05922,cat,wikidump:Catwings,O,O
+s00103,over cap: Sand cat,s05941,cat,wikidump:United Hardware Distributing Company,A-gen,X
+s00067,over cap: Sand cat,s05932,cat,wikidump:Parliament Hill cat colony,A-gen,O
+s00134,over cap: Sand cat,s05945,cat,wikidump:Cat righting reflex,A-gen,O
+s00019,over cap: Sand cat,s05925,cat,wikidump:The Adventures of Twizzle,O,O
+s00102,over cap: Sand cat,s05940,cat,wikidump:Jerry Mitchell (reporter),O,O
+s00091,over cap: Sand cat,s05936,cat,wikidump:Free warren,A-gen,A-gen
+s00290,over cap: Steam hammer,s05975,hammer,wikidump:Wells Fargo Building (Philadelphia),O,O
+s00155,over cap: Steam hammer,s05950,hammer,wikidump:Dracula (Marvel Comics),O,O
+s00240,over cap: Steam hammer,s05960,hammer,wikidump:Roger Touhy,X,X
+s00277,over cap: Steam hammer,s05970,hammer,wikidump:Action (piano),X,O
+s00284,over cap: Steam hammer,s05973,hammer,wikidump:Soil compaction,A-gen,A-gen
+s00262,over cap: Steam hammer,s05965,hammer,wikidump:Monument to the Unknown Hero,O,O
+s00272,over cap: Steam hammer,s05968,hammer,wikidump:Martelo,X,A-def
+s00266,over cap: Steam hammer,s05967,hammer,"wikidump:United States Penitentiary, Allenwood",X,X
+s00279,over cap: Steam hammer,s05971,hammer,wikidump:Marcello,X,X
+s00225,over cap: Steam hammer,s05959,hammer,wikidump:A. J. Hammer,X,X
+s00184,over cap: Steam hammer,s05955,hammer,wikidump:Fin de Siècle (album),O,O
+s00162,over cap: Steam hammer,s05952,hammer,wikidump:Carol Jackson,A-idiom,A-idiom
+s00259,over cap: Steam hammer,s05964,hammer,wikidump:Let's Get It Started (album),X,X
+s00222,over cap: Steam hammer,s05958,hammer,wikidump:Geologist's hammer,A-gen,A-gen
+s00169,over cap: Steam hammer,s05953,hammer,wikidump:Sviatlana Sudak Torun,X,X
+s00250,over cap: Steam hammer,s05961,hammer,wikidump:Drakaea,X,X
+s00254,over cap: Steam hammer,s05963,hammer,wikidump:Dexter Morgan,A-gen,O
+s00273,over cap: Steam hammer,s05969,hammer,wikidump:Andriy Skvaruk,X,X
+s00283,over cap: Water hammer,s05972,hammer,wikidump:Apollo 17,O,O
+s00263,over cap: Water hammer,s05966,hammer,wikidump:Battle of Keresztes,O,O
+s00154,over cap: Water hammer,s05949,hammer,wikidump:Lenggong,X,X
+s00287,over cap: Water hammer,s05974,hammer,wikidump:Impact driver,A-gen,O
+s00252,over cap: Water hammer,s05962,hammer,wikidump:Canzo,O,X
+s01859,over cap: Turkish cuisine,s05983,tomato,wikidump:Kurram District,A-gen,X
+s01811,over cap: Turkish cuisine,s05977,tomato,wikidump:Kūčios,X,X
+s01909,over cap: Turkish cuisine,s05988,tomato,wikidump:Barbecue sauce,X,X
+s01861,over cap: Turkish cuisine,s05984,tomato,wikidump:Our Brand Is Crisis (2005 film),X,X
+s01890,over cap: Turkish cuisine,s05986,tomato,wikidump:List of pre-Columbian inventions and innovations of Indigenous Americans,A-gen,X
+s01904,over cap: Turkish cuisine,s05987,tomato,wikidump:Products produced from The Simpsons,A-gen,X
+s01874,over cap: Turkish cuisine,s05985,tomato,wikidump:Salsola soda,A-gen,A-gen
+s01939,over cap: Turkish cuisine,s05989,tomato,wikidump:Ottoman cuisine,A-gen,A-gen
+s01817,over cap: Turkish cuisine,s05978,tomato,wikidump:Arizona's 2nd congressional district,X,X

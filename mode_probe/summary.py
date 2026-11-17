@@ -194,8 +194,8 @@ def write(ctx, res: dict, meta: dict) -> str:
              + _verdict_lines(res["e3"]["verdicts"], models) + "\n")
     L.append("*What it does not show.* Cross-genre training uses all twenty words, so it is not also "
              "a cross-word test. Wikipedia and fiction differ in their O/A-gen balance; AUC is "
-             "insensitive to that, the fitted probe is not. Legacy Wikipedia sentences have no "
-             "article id, so the within-Wikipedia baseline may share articles across folds.\n")
+             "insensitive to that, the fitted probe is not. The within-genre baselines keep each "
+             "article or book inside one fold.\n")
     for m in models:
         if not res["e3"]["verdicts"][m].startswith("supported"):
             stops.append(f"E3 ({NAMES.get(m, m)}): {res['e3']['verdicts'][m]}.")

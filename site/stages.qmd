@@ -22,7 +22,7 @@ halves()
 
 Whole sentences from two kinds of writing: English Wikipedia (encyclopedic) and English-language novels from Project Gutenberg (fiction). The novels are by authors born between 1760 and 1930, at most three books per author; poetry, drama, short-story collections and children's books are left out. Each sentence contains its word exactly once, has 6 to 40 words, and ends a sentence properly; sentences where the word is capitalised mid-sentence (usually a name) are dropped.
 
-No single text should dominate a word, so at most five sentences come from one Wikipedia article and six from one book. One exception: 633 of the 3,000 Wikipedia sentences were reused from the 2025 study and collected before this cap existed. Among them one article can supply many sentences for the same word, up to 23 ("Steam hammer" for *hammer*, "List of individual cats" for *cat*); seven article–word pairs exceed five. *Tomato* has only 50 fiction sentences: the novels did not contain more that passed the filters.
+No single text should dominate a word, so at most five sentences come from one Wikipedia article and six from one book. About a fifth of the Wikipedia sentences were first collected for the 2025 study; their articles were traced afterwards (in the 2023 dump, or by searching Wikipedia for the sentence), and the 90 that broke the cap or could not be traced were replaced with new sentences drawn the same way and labeled by the same labelers ([log](https://github.com/aathanor/word-modes/blob/main/mode_probe/data/rebalance_log.csv)). *Tomato* has only 50 fiction sentences: the novels did not contain more that passed the filters.
 
 ```{python}
 from _site import chart
@@ -85,7 +85,7 @@ scripts()
 
 ## Sources and credits {#credits}
 
-- **Wikipedia.** Sentences quoted from English Wikipedia articles, by Wikipedia contributors, licensed [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/). Most come from the November 2023 English dump as published by the Wikimedia Foundation on Hugging Face ([wikimedia/wikipedia](https://huggingface.co/datasets/wikimedia/wikipedia), 20231101.en). The [sentence explorer](explorer.qmd) links each sentence to its article. For 36 sentences reused from the 2025 study the article could not be identified; they are marked as such.
+- **Wikipedia.** Sentences quoted from English Wikipedia articles, by Wikipedia contributors, licensed [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/). Most come from the November 2023 English dump as published by the Wikimedia Foundation on Hugging Face ([wikimedia/wikipedia](https://huggingface.co/datasets/wikimedia/wikipedia), 20231101.en). The [sentence explorer](explorer.qmd) links each sentence to its article.
 - **Project Gutenberg.** Sentences quoted from novels in the [Project Gutenberg](https://www.gutenberg.org) collection, public domain in the United States; the explorer gives each sentence's ebook number.
 - **Models whose representations are read.** [bert-base-uncased](https://huggingface.co/google-bert/bert-base-uncased) (Devlin et al. 2019, Google); [Qwen3-1.7B](https://huggingface.co/Qwen/Qwen3-1.7B) (Qwen Team, Alibaba, 2025); [all-mpnet-base-v2](https://huggingface.co/sentence-transformers/all-mpnet-base-v2) (sentence-transformers; Reimers & Gurevych 2019, built on MPNet, Song et al. 2020). All Apache 2.0.
 - **Labelers.** Claude Opus 5.5 (Anthropic), all sentences and the 300-sentence sample; Qwen3.8 27B, run locally through Ollama, the cross-check and the first attempt.

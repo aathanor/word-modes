@@ -1,6 +1,6 @@
 {
   "tag": null,
-  "generated": "2026-11-17T08:54:05",
+  "generated": "2026-11-17T13:58:28",
   "models": [
     "bert",
     "decoder",
@@ -22,7 +22,7 @@
     },
     "mpnet": {
       "layer": "S",
-      "C": 0.001
+      "C": 0.01
     },
     "decoder_final": {
       "layer": "final_L21",
@@ -30,7 +30,7 @@
     }
   },
   "data_line": "5900 natural sentences, 20 words, 3000 Wikipedia and 2900 fiction; 200 minimal pairs.",
-  "label_line": "Model labels (claude-opus-5-5): O 3023, A-gen 956, A-idiom 519, A-def 11, X 1391. Gold: 300 sentences. Cohen's \u03ba (model vs gold, n=300) = 0.862; cross-family check, qwen3.8:27b vs gold: \u03ba = 0.710. The two labelers agree on 80% of all 5,900 sentences (\u03ba = 0.674).",
+  "label_line": "Model labels (claude-opus-5-5): O 3016, A-gen 968, A-idiom 521, A-def 12, X 1383. Gold: 300 sentences. Cohen's \u03ba (model vs gold, n=300) = 0.862; cross-family check, qwen3.8:27b vs gold: \u03ba = 0.710. The two labelers agree on 80% of all 5,900 sentences (\u03ba = 0.674).",
   "gold": {
     "per_word": 15,
     "labeler": "Claude Opus 5.5 (claude-opus-5-5), blind to the model labels; no human labels",
@@ -135,9 +135,9 @@
         "all": "supported"
       },
       "pairs": {
-        "bert vs decoder": 0.7730178521515452,
-        "bert vs mpnet": 0.7669499686811388,
-        "decoder vs mpnet": 0.7477862447213051
+        "bert vs decoder": 0.7754388934998039,
+        "bert vs mpnet": 0.7401955163881326,
+        "decoder vs mpnet": 0.705985298264626
       }
     },
     {
