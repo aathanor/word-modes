@@ -26,7 +26,7 @@ ratings of Brysbaert, Warriner and Kuperman (2014) are downloaded the same way.
 | Code: `mode_probe/**/*.py`, `site/*.py`, `site/*.sh`, `site/assets/*.js`, `site/styles.scss`, `site/deploy/` | MIT ([`LICENSE`](LICENSE)) |
 | Data and results: everything under `mode_probe/data/`, `mode_probe/results/`, `mode_probe/figures/` | CC BY-SA 4.0 ([`LICENSES/CC-BY-SA-4.0.txt`](LICENSES/CC-BY-SA-4.0.txt)) |
 | Text: the prose of the site pages (`site/*.qmd`, `site/rungs/*.qmd`) and `mode_probe/LABELING.md` | CC BY 4.0 ([`LICENSES/CC-BY-4.0.txt`](LICENSES/CC-BY-4.0.txt)) |
-| Bundled libraries in `site/assets/vendor/` | their own ([`NOTICE.md`](site/assets/vendor/NOTICE.md)) |
+| Bundled libraries in `site/assets/vendor/` and fonts in `site/assets/fonts/` | their own ([`NOTICE.md`](site/assets/vendor/NOTICE.md)) |
 
 The data carry share-alike because many of the sentences are quoted from Wikipedia,
 whose text is CC BY-SA 4.0; each such sentence names its article in the site's

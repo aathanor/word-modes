@@ -26,3 +26,12 @@ ISC licence (D3, Observable Plot):
 MIT licence (KaTeX): the text in the repository's top-level `LICENSE`, with
 "Copyright (c) 2013-2020 Khan Academy and other contributors" in place of the
 copyright line there.
+
+## Fonts (`site/assets/fonts/`)
+
+| font | version | licence | copyright |
+|---|---|---|---|
+| [Literata](https://github.com/googlefonts/literata) | from @fontsource-variable/literata 5.2.8 | SIL Open Font License 1.1 | 2017 The Literata Project Authors |
+| [Inter](https://github.com/rsms/inter) | from @fontsource-variable/inter 5.2.8 | SIL Open Font License 1.1 | 2016 The Inter Project Authors |
+
+The licence text is in `site/assets/fonts/OFL.txt`.

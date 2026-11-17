@@ -17,7 +17,7 @@
 
   function width(el) { return Math.max(300, Math.min(el.clientWidth || 720, 860)); }
   function base(el, opts) {
-    const o = Object.assign({width: width(el), style: {fontSize: "12px", color: INK, background: "transparent"},
+    const o = Object.assign({width: width(el), style: {fontSize: "12px", fontFamily: '"Inter Variable", Inter, system-ui, sans-serif', color: INK, background: "transparent"},
                              marginLeft: 70, marginBottom: 50, marginRight: 24}, opts);
     if (o.x) o.x = Object.assign({labelAnchor: "center", labelOffset: 40, labelArrow: "none"}, o.x);
     return o;
