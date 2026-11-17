@@ -2,7 +2,8 @@
 
 token_mean  (BERT):     mean over the target's wordpieces, at each candidate layer.
 token_last  (decoder):  hidden state at the target's last token, at each candidate layer.
-                        The same pass also stores the final-token state ("final_L*"),
+                        The same pass also stores the final-token state ("final_L*") and
+                        the mean over the tokens after the target ("after_L*"),
                         a supplementary readout that sees the whole sentence.
 sentence    (mpnet):    sentence embedding.
 """
@@ -68,10 +69,14 @@ def _embed_tokens(model_key: str, df: pd.DataFrame, device: str, batch_size: int
     tok.padding_side = "right"
 
     sents, words = list(df["sentence"]), list(df["word"])
+    # optional explicit character spans (columns span_a, span_b), for data whose target is given
+    # by position rather than by word (UDS); otherwise the target is found by word form
+    spans = list(zip(df["span_a"], df["span_b"])) if {"span_a", "span_b"} <= set(df.columns) else None
     order = np.argsort([len(s) for s in sents])
     out = {f"L{l}": np.zeros((len(sents), model.config.hidden_size), np.float32) for l in layers}
     if mcfg["kind"] == "token_last":
         out.update({f"final_L{l}": np.zeros_like(out[f"L{l}"]) for l in layers})
+        out.update({f"after_L{l}": np.zeros_like(out[f"L{l}"]) for l in layers})
 
     with torch.no_grad():
         for start in range(0, len(order), batch_size):
@@ -84,7 +89,7 @@ def _embed_tokens(model_key: str, df: pd.DataFrame, device: str, batch_size: int
             hs = model(**enc, output_hidden_states=True).hidden_states
             lengths = enc["attention_mask"].sum(1).tolist()
             for j, i in enumerate(idx):
-                pos = _token_indices(offsets[j], target_span(sents[i], words[i]))
+                pos = _token_indices(offsets[j], spans[i] if spans else target_span(sents[i], words[i]))
                 if not pos:
                     raise ValueError(f"no tokens for target in {sents[i]!r}")
                 for l in layers:
@@ -94,6 +99,8 @@ def _embed_tokens(model_key: str, df: pd.DataFrame, device: str, batch_size: int
                     else:
                         out[f"L{l}"][i] = h[pos[-1]].cpu().numpy()
                         out[f"final_L{l}"][i] = h[lengths[j] - 1].cpu().numpy()
+                        after = h[pos[-1] + 1:lengths[j]]
+                        out[f"after_L{l}"][i] = (after.mean(0) if len(after) else h[lengths[j] - 1]).cpu().numpy()
     del model
     if device == "cuda":
         torch.cuda.empty_cache()
@@ -118,7 +125,10 @@ def embed(model_key: str, df: pd.DataFrame, set_name: str, device: str,
     if path.exists():
         sids, arrays = load_cache(path)
         assert sids == list(df["sid"]), "cache index mismatch"
-        return arrays
+        stale = mcfg["kind"] == "token_last" and not any(k.startswith("after_") for k in arrays)
+        if not stale:
+            return arrays
+        print(f"[embed] {model_key}: cache predates the after-target readout; recomputing")
     print(f"[embed] {model_key} ({mcfg['name']}) on {set_name}: {len(df)} sentences")
     if mcfg["kind"] == "sentence":
         arrays = _embed_sentences(model_key, df, device, batch_size)

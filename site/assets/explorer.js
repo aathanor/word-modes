@@ -1,6 +1,6 @@
 // Sentence explorer: filter, sort and read every sentence with its labels and scores.
 (function () {
-  const NAMES = {bert: "BERT", decoder: "Decoder", decoder_final: "Decoder, final token", mpnet: "mpnet"};
+  const NAMES = {bert: "BERT", decoder: "Decoder", decoder_target: "Decoder, at the word", mpnet: "mpnet"};
   const LABELS = ["O", "A-gen", "A-def", "A-idiom", "X"];
   const PAGE = 50;
   const esc = s => String(s).replace(/[&<>"]/g, c => ({"&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;"}[c]));

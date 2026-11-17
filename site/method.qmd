@@ -9,16 +9,16 @@ from _site import method_facts
 method_facts()
 ```
 
-Sentences were taken whole from two sources, for twenty concrete nouns: Wikipedia (encyclopedic) and English novels from Project Gutenberg by authors born 1760–1930 (fiction), at most three books per author. A sentence was kept if it had 6 to 40 words, contained the target word exactly once (singular or plural, not inside a hyphenated compound), ended like a sentence, and was not a list, caption or table row. Sentences in which the target is capitalised mid-sentence ("Hudson River", "Apple Inc.") were dropped as parts of names. At most five sentences come from any one article and six from any one book. The target was 150 sentences per word per genre; "tomato" yields only 50 usable sentences in the 500 novels.
+Sentences were taken whole from two sources, for twenty concrete nouns: Wikipedia (encyclopedic) and English novels from Project Gutenberg by authors born 1760–1930 (fiction), at most three books per author. A sentence was kept if it had 6 to 40 words, contained the target word exactly once (singular or plural, not inside a hyphenated compound), ended like a sentence, and was not a list, caption or table row. Sentences in which the target is capitalised mid-sentence ("Hudson River", "Apple Inc.") were dropped as parts of names. At most five sentences come from any one article and six from any one book. The target was 150 sentences per word per genre; "tomato" yields only 50 usable sentences in the novels.
 
-The nouns are split by word. **Half A** (cat, hammer, apple, river, chair, horse, bottle, bridge, knife, tree) is used for every choice of method. **Half B** (dog, fork, tomato, mountain, door, cow, lamp, road, spoon, stone) is used once, at the end. A guard in the code raises an error if a Half-B sentence reaches any function that chooses a setting.
+The nouns are split by word. **Half A** (cat, hammer, apple, river, chair, horse, bottle, bridge, knife, tree) is used for every choice of method. **Half B** (dog, fork, tomato, mountain, door, cow, lamp, road, spoon, stone) never sets a layer or a regularisation strength. It is used in testing (Half A → Half B), in training for the reverse direction (Half B → Half A), and in the tests that use all twenty words. A guard in the code raises an error if a Half-B sentence reaches any function that chooses a setting.
 
 ## Labels
 
 No sentence was labeled by a person.
 
 - **All 5,900 sentences** were labeled by Claude Opus 5.5 through the Anthropic API, one sentence per request, with the criterion below as the whole instruction and the answer restricted to the five labels. The model does not accept a temperature setting, so the labels are one recorded run.
-- **The sample of 300** (15 per word, split across the two genres) was labeled by Claude Opus 5.5 in a separate session, before and without access to any model's labels. Both labelers are the same model, so their agreement can miss errors they share.
+- **The sample of 300** (15 per word, split across the two genres) was labeled by Claude Opus 5.5 inside the working session in which the code was written (in-session), from the criterion alone, without opening any model's labels, embeddings or results. Both labelers are the same model, so their agreement can miss errors they share; κ between them measures consistency, not independent agreement.
 - **A cross-check from another family:** Qwen3.8 27B, run locally, relabeled all sentences under the same criterion. Its agreement with the sample is reported next to Claude's.
 
 ### The criterion
@@ -47,7 +47,7 @@ kappa_table()
 ## Models and readouts
 
 - **BERT** (`bert-base-uncased`): the embedding of the target word itself, averaged over its word pieces, at the layer chosen on Half A among 6, 9 and 12.
-- **Decoder** (`Qwen/Qwen3-1.7B`): the hidden state at the target word's last piece, at the layer chosen on Half A among 25%, 50% and 75% depth. A decoder reads left to right, so at the target word it has seen only the words before it; in "The cat is on the mat" that is "The". The state at the sentence's last token, which has read the whole sentence, comes from the same pass and is reported as a supplement.
+- **Decoder** (`Qwen/Qwen3-1.7B`). A decoder reads left to right, so at the target word it has seen only the words before it; in "The cat is on the mat" that is "The". Three readouts come from the same pass: the state at the target word's last piece, the state at the sentence's last token, and the mean of the states over the tokens after the target, which have read the noun and what is said about it. Which readout, and which layer among 25%, 50% and 75% depth, is chosen on Half A like everything else; the state at the word itself is also reported as a supplement ("Decoder, at the word"), because it was the planned readout.
 - **mpnet** (`all-mpnet-base-v2`): one embedding for the whole sentence.
 - **mpnet-multilingual**: only for the Romanian test (E8).
 
@@ -69,5 +69,6 @@ thresholds()
 - Wikipedia sentences for fourteen words come from the English Wikipedia dump of 1 November 2023, because the live API throttled the harvest. Six words reuse an earlier cache, whose sentence counts do not match its old embeddings; the old embeddings were not used.
 - Fiction comes from Project Gutenberg texts downloaded directly; the corpus bundled with NLTK has only eighteen books.
 - The sample was labeled by a model, not by hand.
-- **Labeling history.** The first round used Qwen3.8 27B for all sentences. Its agreement with the sample was κ = 0.55, below the gate, and no experiment was run. The disagreements fell into cases the criterion did not settle, so clarifications were added under the unchanged criterion (version 2, shown above): modifier and material uses are excluded, habits and procedures are A-gen, similes are idioms, other senses are excluded. Twenty-one sample labels were changed to apply the modifier rule. The full set was then relabeled by Claude Opus 5.5. The first round's labels are kept in `data/labeling_v1/`.
-- The decoder's final-token state is added as a supplementary readout, for the reason given above.
+- **Labeling history.** The first round used Qwen3.8 27B for all sentences. Its agreement with the sample was κ = 0.55, below the gate, and no experiment was run. The disagreements fell into cases the criterion did not settle, so clarifications were added under the unchanged criterion (version 2, shown above): modifier and material uses are excluded, habits and procedures are A-gen, similes are idioms, other senses are excluded. Twenty-one sample labels were changed to apply the modifier rule. About 25 of Qwen's first-round labels had been seen in the printout of disagreements before those changes were made; no other sample label was changed. The full set was then relabeled by Claude Opus 5.5. The first round's labels are kept in `data/labeling_v1/`.
+- **Decoder readout.** The plan read the decoder at the target word. After the first results, the readout was made a choice on Half A among three (at the word, last token, mean after the word), the same way the layer is chosen; Half A chose the mean after the word. The state at the word is kept as a supplement so the change can be seen.
+- 90 Wikipedia sentences reused from the 2025 study were replaced after the first results: 36 whose article could not be traced (the licence requires attribution) and 54 beyond five per article. Every verdict was unchanged; the replacements are logged in `data/rebalance_log.csv`.

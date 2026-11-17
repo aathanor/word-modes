@@ -15,15 +15,15 @@ def test_sheet_roundtrip(tmp_path):
     assert len(dv) == 1 and "A-idiom" in dv[0].formula1 and "D2:D301" in str(dv[0].sqref)
     assert human.read_labels(p).empty
 
-    ws["D2"], ws["D3"], ws["D4"] = "O", " A-gen ", ""
+    ws["D2"], ws["D3"], ws["D4"] = "P-ep", " K-gen ", ""
     wb.save(p)
     got = human.read_labels(p)
-    assert got["label"].tolist() == ["O", "A-gen"]
+    assert got["label"].tolist() == ["P-ep", "K-gen"]
     assert got["sid"].tolist() == [ws["F2"].value, ws["F3"].value]
     with pytest.raises(SystemExit):
         human.make_sheet(p)
 
-    ws["D5"] = "Agen"
+    ws["D5"] = "Kgen"
     wb.save(p)
     with pytest.raises(ValueError):
         human.read_labels(p)

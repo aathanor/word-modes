@@ -1,11 +1,11 @@
 {
   "tag": null,
-  "generated": "2026-11-17T13:58:28",
+  "generated": "2026-11-17T15:34:45",
   "models": [
     "bert",
     "decoder",
     "mpnet",
-    "decoder_final"
+    "decoder_target"
   ],
   "primary": [
     "bert",
@@ -17,15 +17,15 @@
       "C": 0.01
     },
     "decoder": {
-      "layer": "L21",
+      "layer": "after_L21",
       "C": 0.001
     },
     "mpnet": {
       "layer": "S",
       "C": 0.01
     },
-    "decoder_final": {
-      "layer": "final_L21",
+    "decoder_target": {
+      "layer": "L21",
       "C": 0.001
     }
   },
@@ -45,7 +45,7 @@
         "bert": "not supported",
         "decoder": "not supported",
         "mpnet": "not supported",
-        "decoder_final": "not supported"
+        "decoder_target": "not supported"
       }
     },
     {
@@ -56,7 +56,7 @@
         "bert": "supported",
         "decoder": "supported",
         "mpnet": "supported",
-        "decoder_final": "supported"
+        "decoder_target": "supported"
       }
     },
     {
@@ -67,24 +67,24 @@
         "bert": "supported",
         "decoder": "supported",
         "mpnet": "supported",
-        "decoder_final": "supported"
+        "decoder_target": "supported"
       }
     },
     {
       "id": "e4",
-      "title": "Not grammar",
+      "title": "Not reducible to surface grammar",
       "run": true,
       "verdicts": {
         "bert": "supported",
-        "decoder": "mixed",
+        "decoder": "supported",
         "mpnet": "supported",
-        "decoder_final": "supported"
+        "decoder_target": "supported (minimal pairs not applicable)"
       },
       "grammar_wins": {
         "bert": false,
         "decoder": false,
         "mpnet": false,
-        "decoder_final": false
+        "decoder_target": false
       }
     },
     {
@@ -95,7 +95,7 @@
         "bert": "supported",
         "decoder": "supported",
         "mpnet": "supported",
-        "decoder_final": "supported"
+        "decoder_target": "supported"
       }
     },
     {
@@ -106,7 +106,7 @@
         "bert": "definitions: not supported (underpowered); idioms: between O and A-gen",
         "decoder": "definitions: not supported (underpowered); idioms: between O and A-gen",
         "mpnet": "definitions: not supported (underpowered); idioms: between O and A-gen",
-        "decoder_final": "definitions: supported (underpowered); idioms: between O and A-gen"
+        "decoder_target": "definitions: not supported (underpowered); idioms: between O and A-gen"
       },
       "detail": {
         "bert": {
@@ -121,8 +121,8 @@
           "definitions": "not supported (underpowered)",
           "idioms": "between O and A-gen"
         },
-        "decoder_final": {
-          "definitions": "supported (underpowered)",
+        "decoder_target": {
+          "definitions": "not supported (underpowered)",
           "idioms": "between O and A-gen"
         }
       }
@@ -135,9 +135,9 @@
         "all": "supported"
       },
       "pairs": {
-        "bert vs decoder": 0.7754388934998039,
+        "bert vs decoder": 0.7778885181663846,
         "bert vs mpnet": 0.7401955163881326,
-        "decoder vs mpnet": 0.705985298264626
+        "decoder vs mpnet": 0.790847381225827
       }
     },
     {
@@ -151,10 +151,10 @@
     "E1 (BERT): not prominent \u2014 the mode is not among the top three unlabeled directions of variation pooled over words; see E2 for whether it is there.",
     "E1 (Decoder): not prominent \u2014 the mode is not among the top three unlabeled directions of variation pooled over words; see E2 for whether it is there.",
     "E1 (mpnet): not prominent \u2014 the mode is not among the top three unlabeled directions of variation pooled over words; see E2 for whether it is there.",
-    "E1 (Decoder, final-token readout (supplementary)): not prominent \u2014 the mode is not among the top three unlabeled directions of variation pooled over words; see E2 for whether it is there.",
-    "E4 (Decoder): mixed.",
+    "E1 (Decoder, at the word (supplementary)): not prominent \u2014 the mode is not among the top three unlabeled directions of variation pooled over words; see E2 for whether it is there.",
     "E6 definitions (BERT): not supported (underpowered).",
     "E6 definitions (Decoder): not supported (underpowered).",
-    "E6 definitions (mpnet): not supported (underpowered)."
+    "E6 definitions (mpnet): not supported (underpowered).",
+    "E6 definitions (Decoder, at the word (supplementary)): not supported (underpowered)."
   ]
 }

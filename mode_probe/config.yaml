@@ -25,7 +25,8 @@ harvest:
     author_birth_min: 1760
     author_birth_max: 1930
     seconds_between_requests: 2.0
-    mirror: https://www.gutenberg.org/cache/epub/{id}/pg{id}.txt
+    # gutenberg.org rate-limits bulk downloads (503, retry after an hour); the PGLAF mirror serves the same files
+    mirror: https://gutenberg.pglaf.org/cache/epub/{id}/pg{id}.txt
 
 gold:
   per_word: 15
@@ -59,6 +60,18 @@ models:
   multilingual:
     name: sentence-transformers/paraphrase-multilingual-mpnet-base-v2
     kind: sentence
+  # same family, four sizes, for the supplementary scale comparison (scale.py)
+  qwen3_0_6b:
+    name: Qwen/Qwen3-0.6B
+    kind: token_last
+  qwen3_4b:
+    name: Qwen/Qwen3-4B
+    kind: token_last
+  qwen3_8b:
+    name: Qwen/Qwen3-8B
+    kind: token_last
+
+scale_models: [qwen3_0_6b, decoder, qwen3_4b, qwen3_8b]
 
 primary_models: [bert, decoder]
 main_models: [bert, decoder, mpnet]

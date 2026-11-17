@@ -20,13 +20,13 @@ def _out(text: str) -> None:
 ROOT = Path(__file__).resolve().parent
 DATA = ROOT / "data"
 
-NAMES = {"bert": "BERT", "decoder": "Decoder", "decoder_final": "Decoder, final token",
+NAMES = {"bert": "BERT", "decoder": "Decoder", "decoder_target": "Decoder, at the word",
          "mpnet": "mpnet", "multilingual": "mpnet-multilingual", "all": "all models"}
 QUESTIONS = {
     "e1": "Without labels, is the mode one of the main directions along which a word's embeddings vary, or a thinner signal a probe has to be told to find?",
     "e2": "Does a probe trained on some words separate the modes in words it never saw?",
     "e3": "Does the direction carry over from encyclopedic text to fiction and back?",
-    "e4": "Does it beat a surface-grammar classifier, and survive pairs with the same surface form?",
+    "e4": "Does it do clearly better than a classifier that sees only surface grammar, and survive pairs with the same surface form?",
     "e5": "Does it survive removing the concreteness of the other words in the sentence?",
     "e6": "Do definitions sit at the far abstract end? Where do idioms fall?",
     "e7": "Do an encoder, a decoder and a sentence model order the same sentences the same way?",
@@ -102,7 +102,6 @@ STEPS = [
     ("Is it something else?", ["e3", "e4", "e5"]),
     ("Does it behave as a mark of the mode should?", ["e7", "e6"]),
     ("How visible is it without labels?", ["e1"]),
-    ("Beyond English", ["e8"]),
 ]
 
 
@@ -293,13 +292,14 @@ def readouts() -> None:
             mid = (x0 + x1) / 2
             out.append(f'<path d="M{x0},{y - 13} Q{mid},{y - 40} {x1},{y - 13}" class="ro-arc"/>')
         if box:
-            out.append(f'<path d="M{xs[0]},{y + 16} L{xs[0]},{y + 22} L{xs[-1] + 44},{y + 22} L{xs[-1] + 44},{y + 16}" class="ro-br"/>')
+            i0, i1 = box if isinstance(box, tuple) else (0, len(xs) - 1)
+            out.append(f'<path d="M{xs[i0]},{y + 16} L{xs[i0]},{y + 22} L{xs[i1] + 44},{y + 22} L{xs[i1] + 44},{y + 16}" class="ro-br"/>')
         out.append(f'<text x="4" y="{y + 40}" class="ro-n">{note}</text>')
         return "".join(out)
 
     svg = ('<svg class="readouts" viewBox="0 0 380 380" role="img" aria-label="What each model reads at the target word">'
            + row(75, "BERT: the word, read in both directions", [0, 2, 3, 4, 5, 6], "the target sees the whole sentence")
-           + row(195, "Decoder: the word, read left to right", [0], "at “cat” it has read only “The”", faded=(2, 3, 4, 5, 6))
+           + row(195, "Decoder: the words after it, read left to right", [0], "averaged over “is … .”, which have all read “cat”", box=(2, 6))
            + row(315, "mpnet: the whole sentence, one vector", [], "no single word is read; the sentence is", box=True)
            + "</svg>")
     _out(f'<div class="ro-wrap">{svg}</div>')
@@ -414,7 +414,7 @@ def pairs_table() -> None:
     if not p.exists():
         return
     df = pd.read_json(p)
-    models = [c for c in df.columns if c in NAMES and c != "decoder_final"]
+    models = [c for c in df.columns if c in NAMES and c != "decoder_target"]
 
     def cell(v):
         if v is None or pd.isna(v):
@@ -436,3 +436,14 @@ def downloads() -> None:
     files = sorted(p for p in DATA.iterdir() if p.is_file())
     rows = "\n".join(f"| [{p.name}](data/{p.name}) | {p.stat().st_size / 1024:,.0f} KB |" for p in files)
     _out(("| file | size |\n|---|---|\n" + rows))
+
+
+def further() -> None:
+    """The tests added after the first results, as summary_v3 wrote them."""
+    p = DATA / "summary_further.md"
+    if not p.exists():
+        _out("*These tests have not been run yet.*")
+        return
+    text = p.read_text().split("\n", 1)[1]          # drop the file's own title
+    _out(text)
+

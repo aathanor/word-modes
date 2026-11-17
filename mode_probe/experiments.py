@@ -15,7 +15,7 @@ from . import figures as F
 from . import probe as P
 from .common import all_words, config, rdir
 
-MODEL_LABEL = {"bert": "BERT", "decoder": "Decoder", "decoder_final": "Decoder (final token)",
+MODEL_LABEL = {"bert": "BERT", "decoder": "Decoder", "decoder_target": "Decoder (at the word)",
                "mpnet": "mpnet", "multilingual": "mpnet-multilingual"}
 
 
@@ -43,9 +43,12 @@ class Ctx:
 
 
 def layer_keys(m: str, emb: dict) -> list[str]:
-    if m == "decoder_final":
-        return sorted(k for k in emb if k.startswith("final_"))
-    return sorted(k for k in emb if not k.startswith("final_"))
+    """Candidate readouts chosen among on Half A. The main decoder chooses among three readouts
+    (the target word "L*", the last token "final_L*", the mean after the target "after_L*") and
+    their layers; "decoder_target" keeps the originally planned readout, the target word."""
+    if m == "decoder_target":
+        return sorted(k for k in emb if k.startswith("L"))
+    return sorted(emb)
 
 
 def _mask(ctx, **kw) -> np.ndarray:
@@ -82,11 +85,11 @@ def select_all(ctx: Ctx) -> pd.DataFrame:
     """Choose layer and L2 strength for every model on Half A only."""
     rows = []
     for m in ctx.models:
-        src = "decoder" if m == "decoder_final" else m
+        src = "decoder" if m == "decoder_target" else m
         keys = layer_keys(m, ctx.emb[src])
         res = P.select_hyperparams(ctx.nat, ctx.emb[src], keys)
         ctx.sel[m] = {"layer": res["layer"], "C": res["C"]}
-        if m == "decoder_final":
+        if m == "decoder_target":
             ctx.emb[m] = ctx.emb[src]
         g = res["grid"].assign(model=m)
         rows.append(g)
@@ -155,7 +158,70 @@ def e1_prominence(ctx: Ctx) -> dict:
             verdicts[m] = "mixed"
         else:
             verdicts[m] = "not supported"
-    return {"table": df, "verdicts": verdicts}
+    extra = e1_extensions(ctx)
+    return {"table": df, "verdicts": verdicts, **extra}
+
+
+def _aligned(Z: np.ndarray, y: np.ndarray, thr: float) -> tuple[list[float], int | None]:
+    aucs = [max(a, 1 - a) for a in (P.auc(y, Z[:, i]) for i in range(Z.shape[1]))]
+    return aucs, next((i + 1 for i, a in enumerate(aucs) if a >= thr), None)
+
+
+def e1_extensions(ctx: Ctx, k: int = 10, write: bool = True) -> dict:
+    """Two unsupervised variants added after the first results (same bar as E1, no verdicts).
+
+    E1b, known variation removed: each word centred on its own mean, then genre, sentence length
+    and the surface-grammar features regressed out, then PCA pooled over words.
+    E1c, directions shared across words: each word's embeddings centred and scaled to unit total
+    variance, so every word weighs the same; the leading directions of the average are those
+    large in all words at once. For each, the number of words in whose own top ten it would sit.
+    """
+    thr = ctx.V["e1_aligned_auc"]
+    binm = _bin(ctx.nat["label"])
+    y = P.y_of(ctx.nat["label"][binm])
+    words = ctx.nat["word"].to_numpy()
+    cov = ctx.grammar.copy() if ctx.grammar is not None else pd.DataFrame(index=ctx.nat.index)
+    cov["genre_fiction"] = (ctx.nat["genre"] == "fiction").astype(int)
+    rows_b, rows_c = [], []
+    for m in ctx.models:
+        X = ctx.X(m).astype(np.float64)
+        Xc = np.zeros_like(X)
+        for w in np.unique(words):
+            wm = words == w
+            Xc[wm] = X[wm] - X[wm].mean(0)
+        # E1b
+        F = cov.to_numpy(float)
+        F = (F - F.mean(0)) / np.where(F.std(0) > 0, F.std(0), 1)
+        F1 = np.column_stack([np.ones(len(F)), F])
+        B, *_ = np.linalg.lstsq(F1, Xc, rcond=None)
+        R = (Xc - F1 @ B)[binm]
+        pca = PCA(n_components=k, random_state=config()["seed"]).fit(R)
+        aucs, rank = _aligned(pca.transform(R), y, thr)
+        rows_b.append({"model": m, "rank_first_aligned": rank, "best_pc": int(np.argmax(aucs)) + 1,
+                       "best_auc": max(aucs), "ev_share_best": float(pca.explained_variance_ratio_[int(np.argmax(aucs))]),
+                       **{f"auc_pc{i + 1}": a for i, a in enumerate(aucs)}})
+        # E1c
+        parts, tenth = [], {}
+        for w in np.unique(words):
+            Zw = Xc[(words == w) & binm]
+            tr = (Zw ** 2).sum() / len(Zw)
+            parts.append(Zw / np.sqrt(tr * len(Zw)))
+            ev = np.linalg.svd(Zw / np.sqrt(len(Zw)), compute_uv=False) ** 2
+            tenth[w] = (ev[k - 1] if len(ev) >= k else ev[-1], Zw, tr)
+        _, _, Vt = np.linalg.svd(np.vstack(parts), full_matrices=False)
+        V = Vt[:k]
+        Z = Xc[binm] @ V.T
+        aucs, rank = _aligned(Z, y, thr)
+        shared = [int(sum(((Zw @ v) ** 2).mean() >= t for t, Zw, _ in tenth.values())) for v in V]
+        rows_c.append({"model": m, "rank_first_aligned": rank, "best_pc": int(np.argmax(aucs)) + 1,
+                       "best_auc": max(aucs), "words_in_own_top10_best": shared[int(np.argmax(aucs))],
+                       **{f"auc_c{i + 1}": a for i, a in enumerate(aucs)},
+                       **{f"shared_c{i + 1}": s for i, s in enumerate(shared)}})
+    b, c = pd.DataFrame(rows_b), pd.DataFrame(rows_c)
+    if write:
+        b.to_csv(rdir() / "e1b_residual.csv", index=False)
+        c.to_csv(rdir() / "e1c_shared.csv", index=False)
+    return {"residual": b, "shared": c}
 
 
 # ================================================================ E2
@@ -170,8 +236,14 @@ def e2_transfer(ctx: Ctx) -> dict:
         rec = {"model": m}
         null_word = {}
         for name, tr, te in (("A->B", halfA, halfB), ("B->A", halfB, halfA)):
-            _, s = P.train_test(ctx.nat, X, tr, te, C)
+            clf, s = P.train_test(ctx.nat, X, tr, te, C)
             swap[te] = s
+            # the mean-difference direction: no fitting, so no dependence on the probe's choices
+            d, s_md = P.meandiff_train_test(ctx.nat, X, tr, te)
+            t_md = te & binm
+            sv = np.full(len(ctx.nat), np.nan); sv[te] = s_md
+            rec[f"{name} meandiff auc"] = P.auc(P.y_of(ctx.nat["label"][t_md]), sv[t_md])
+            rec[f"{name} cos(probe, meandiff)"] = P.cosine(clf[-1].coef_[0], d)
             null_p, null_w = P.permutation_null(ctx.nat, X, tr, te, C)
             null_word.update({w: np.nanpercentile(v, 95) for w, v in null_w.items()})
             t = te & binm
@@ -281,7 +353,7 @@ def e3_genre(ctx: Ctx, e2: dict) -> dict:
             verdicts[m] += " (underpowered)"
     df = pd.DataFrame(rows)
     df.to_csv(rdir() / "e3_genre.csv", index=False)
-    F.fig3(e2["by_word"], e2["pooled"], df, [m for m in ctx.models if m != "decoder_final"])
+    F.fig3(e2["by_word"], e2["pooled"], df, [m for m in ctx.models if m != "decoder_target"])
     return {"table": df, "balance": balance, "verdicts": verdicts}
 
 
@@ -380,8 +452,13 @@ def e4_grammar(ctx: Ctx, pair_words_by_half: bool = True) -> dict:
         pairs_ok = bt.pvalue < ctx.V["e4_alpha"]
         grammar_wins[m] = not (rec["embedding LOWO auc"] > rec["grammar LOWO auc"]
                                and rec["LRT p (LOWO)"] < ctx.V["e4_alpha"])
-        verdicts[m] = "supported" if beats and pairs_ok else ("mixed" if beats or pairs_ok
-                                                             else "not supported")
+        if ties == len(diffs):
+            # every pair gives the same state (a left-to-right readout at a word both sentences
+            # reach by the same words): the pair test cannot be run, so only the grammar part decides
+            verdicts[m] = ("supported" if beats else "not supported") + " (minimal pairs not applicable)"
+        else:
+            verdicts[m] = "supported" if beats and pairs_ok else ("mixed" if beats or pairs_ok
+                                                                 else "not supported")
     df = pd.DataFrame(rows)
     df.to_csv(rdir() / "e4_grammar.csv", index=False)
     wdf = pd.DataFrame(word_rows)
@@ -389,7 +466,7 @@ def e4_grammar(ctx: Ctx, pair_words_by_half: bool = True) -> dict:
     pdf_ = pd.DataFrame(pair_rows)
     pdf_.to_csv(rdir() / "e4_minimal_pairs.csv", index=False)
     pd.DataFrame({"feature": ctx.grammar.columns}).to_csv(rdir() / "e4_grammar_features.csv", index=False)
-    F.fig4(wdf, pdf_, [m for m in ctx.models if m != "decoder_final"])
+    F.fig4(wdf, pdf_, [m for m in ctx.models if m != "decoder_target"])
     return {"table": df, "by_word": wdf, "pairs": pdf_, "verdicts": verdicts,
             "grammar_wins": grammar_wins, "grammar_C": Cg}
 

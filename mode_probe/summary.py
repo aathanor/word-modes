@@ -9,7 +9,7 @@ import pandas as pd
 
 from .common import PERMITTED_PHRASE, config, rdir
 
-NAMES = {"bert": "BERT", "decoder": "Decoder", "decoder_final": "Decoder, final-token readout (supplementary)",
+NAMES = {"bert": "BERT", "decoder": "Decoder", "decoder_target": "Decoder, at the word (supplementary)",
          "mpnet": "mpnet", "multilingual": "mpnet-multilingual"}
 
 
@@ -110,6 +110,32 @@ def write(ctx, res: dict, meta: dict) -> str:
              "co-varies with something larger (genre, sentence type); rungs 3–5 test that. A "
              "non-prominent mode can still be linearly readable (rung 2): 'not prominent' says how "
              "large the mark is next to everything else that varies, not whether it is there.\n")
+    if "residual" in res["e1"]:
+        b, c = res["e1"]["residual"].set_index("model"), res["e1"]["shared"].set_index("model")
+        rr = [[NAMES.get(m, m), _f(b.loc[m, "rank_first_aligned"], 0) if pd.notna(b.loc[m, "rank_first_aligned"]) else "none",
+               f"{_f(b.loc[m, 'best_auc'])} (PC{int(b.loc[m, 'best_pc'])})",
+               _f(c.loc[m, "rank_first_aligned"], 0) if pd.notna(c.loc[m, "rank_first_aligned"]) else "none",
+               f"{_f(c.loc[m, 'best_auc'])} (C{int(c.loc[m, 'best_pc'])}, in the top ten of "
+               f"{int(c.loc[m, 'words_in_own_top10_best'])}/20 words)"] for m in models if m in b.index]
+        L.append("**Two variants added after the first results.** Same bar (AUC ≥ "
+                 f"{V['e1_aligned_auc']}), no verdicts. *E1b, known variation removed:* each word centred "
+                 "on its own mean, then genre, sentence length and the surface-grammar features regressed "
+                 "out, then PCA pooled over words. *E1c, directions shared across words:* each word "
+                 "centred and scaled to equal total variance, so that the leading directions are those "
+                 "large in all words at once.\n")
+        L.append(_table(["model", "E1b rank", "E1b best AUC", "E1c rank", "E1c best direction"], rr) + "\n")
+    sc_path = rdir() / "scale.csv"
+    if sc_path.exists():
+        sc = pd.read_csv(sc_path).sort_values("params_b")
+        rr = [[str(r["name"]).split("/")[-1], str(r["readout"]), f"{(r['A->B auc'] + r['B->A auc']) / 2:.3f}",
+               f"{r['E1 best auc']:.3f}" + ("" if pd.isna(r["E1 rank"]) else f" (rank {int(r['E1 rank'])})"),
+               f"{r['E1b best auc']:.3f}", f"{r['E1c best auc']:.3f}"] for _, r in sc.iterrows()]
+        L.append("**Model size (supplementary).** One family, Qwen3, at four sizes. For each, the readout "
+                 "and layer are chosen on Half A as for the main decoder. If training on more text, or "
+                 "compressing it with more capacity, made the mark more prominent, the best unlabeled "
+                 "direction would climb with size.\n")
+        L.append(_table(["model", "readout chosen on Half A", "E2 A↔B AUC", "E1 best AUC",
+                         "E1b best AUC", "E1c best AUC"], rr) + "\n")
     for m in models:
         if not res["e1"]["verdicts"][m].startswith("supported"):
             stops.append(f"E1 ({NAMES.get(m, m)}): {e1v[m]} — the mode is not among the top three "
@@ -137,6 +163,15 @@ def write(ctx, res: dict, meta: dict) -> str:
                      "gold LOWO pooled"], rows) + "\n")
     L.append(f"Null: training labels shuffled within word, {config()['probe']['n_permutations']} "
              "permutations. Per-word AUCs: `results/e2_transfer_by_word.csv`.\n")
+    if "A->B meandiff auc" in p:
+        md = [[NAMES.get(m, m), _f(r["A->B meandiff auc"]), _f(r["B->A meandiff auc"]),
+               _f((r["A->B cos(probe, meandiff)"] + r["B->A cos(probe, meandiff)"]) / 2, 2)]
+              for m in models for _, r in p[p.model == m].iterrows()]
+        L.append("**Without a fitted probe.** The difference between the mean A-gen and the mean O "
+                 "embedding of the training words (standardised), used directly as the direction. It "
+                 "has no regularisation or fitting to tune, so it shows the result does not hang on the "
+                 "probe.\n")
+        L.append(_table(["model", "A→B AUC", "B→A AUC", "cosine with the probe's direction"], md) + "\n")
     L.append("*Verdict* (supported: both directions above the null 95th percentile and median "
              f"held-out-word AUC ≥ {V['e2_supported_auc']}; mixed: above the null but weaker):\n\n"
              + _verdict_lines(e2v, models) + "\n")
@@ -202,7 +237,7 @@ def write(ctx, res: dict, meta: dict) -> str:
 
     # ---------------------------------------------------------------- E4
     t4 = res["e4"]["table"]
-    L.append("## 4. Not grammar (E4)\n")
+    L.append("## 4. Not reducible to surface grammar (E4)\n")
     L.append("*Question.* Does the probe beat a surface-grammar classifier, and does it survive "
              "minimal pairs with identical surface form?\n")
     gw = [m for m in primary if res["e4"]["grammar_wins"].get(m)]
@@ -354,13 +389,13 @@ def write_sections(text: str) -> None:
     for part in parts[1:]:
         head, _, body = part.partition("\n")
         m = re.match(r"(\d)\.", head)
-        key = f"e{m.group(1)}" if m else "stops"
+        key = f"e{m.group(1)}" if m else ("stops" if head.startswith("Where") else re.sub(r"\W+", "_", head.lower()).strip("_"))
         out[key] = {"heading": head.strip(), "body": body.strip()}
     (rdir() / "sections.json").write_text(json.dumps(out, indent=2))
 
 
 RUNGS = [("e1", "Prominence"), ("e2", "Shared direction"), ("e3", "Not genre"),
-         ("e4", "Not grammar"), ("e5", "Not concreteness"), ("e6", "Predictions"),
+         ("e4", "Not reducible to surface grammar"), ("e5", "Not concreteness"), ("e6", "Predictions"),
          ("e7", "Same direction across models"), ("e8", "Not English syntax")]
 
 

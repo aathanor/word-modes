@@ -134,7 +134,10 @@ def export() -> int:
     out.mkdir(parents=True)
     for p in res.glob("*.csv"):
         shutil.copy(p, out / p.name)
-    for name in ("verdicts.json", "sections.json", "env.txt", "summary.md"):
+    if (res / "v3").exists():
+        for p in (res / "v3").glob("*.csv"):
+            shutil.copy(p, out / f"v3_{p.name}")
+    for name in ("verdicts.json", "sections.json", "env.txt", "summary.md", "summary_further.md"):
         if (res / name).exists():
             shutil.copy(res / name, out / name)
     shutil.copy(PKG / "LABELING.md", out / "LABELING.md")

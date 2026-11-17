@@ -266,18 +266,20 @@ def gutenberg_text(book_id: int) -> str:
         return cache.read_text(errors="ignore")
     cache.parent.mkdir(parents=True, exist_ok=True)
     url = gcfg["mirror"].format(id=book_id)
-    text = ""
+    text, missing = "", False
     for attempt in range(3):
         try:
             r = requests.get(url, headers=UA, timeout=60)
             if r.status_code == 404:
+                missing = True
                 break
             r.raise_for_status()
             text = _strip_gutenberg(r.content.decode("utf-8", errors="ignore"))
             break
         except requests.RequestException:
             time.sleep(5 * (attempt + 1))
-    cache.write_text(text)
+    if text or missing:      # a failed download (throttling, network) is not cached as an empty book
+        cache.write_text(text)
     time.sleep(gcfg["seconds_between_requests"])
     return text
 
@@ -297,6 +299,54 @@ def fiction_rows(words: list[str]) -> dict[str, list[dict]]:
                                     "source_id": f"gutenberg:{bid}"})
         if (i + 1) % 50 == 0:
             print(f"[harvest] gutenberg {i + 1}/{len(ids)} books")
+    return rows
+
+
+def encounter_book_ids(n_books: int = 500) -> list[int]:
+    """Writing from encounter (E10): diaries, letters, travel accounts. English, non-fiction, same
+    author window and per-author cap as the novels. Diaries and letters are scarce, so all of them
+    are taken and travel accounts fill the rest."""
+    gcfg = config()["harvest"]["gutenberg"]
+    out = RAW / "gutenberg" / "encounter_ids.json"
+    if out.exists():
+        return json.load(open(out))
+    gutenberg_book_ids()  # makes sure the catalog is downloaded
+    df = pd.read_csv(RAW / "gutenberg" / "pg_catalog.csv", dtype=str).fillna("")
+    df = df[(df["Type"] == "Text") & (df["Language"] == "en")]
+    fiction = (df["Subjects"].str.contains("Fiction", case=False)
+               | df["Bookshelves"].str.contains("Fiction|Novel", case=False))
+    other = df["Subjects"].str.contains("Poetry|Drama|Juvenile|Periodicals|Translations", case=False)
+    df = df[~fiction & ~other].copy()
+    df["birth"] = df["Authors"].map(_birth_year)
+    df = df[df["birth"].between(gcfg["author_birth_min"], gcfg["author_birth_max"])]
+    rng = np.random.default_rng(config()["seed"] + 31)
+    picked = []
+    for pat in (r"Diaries", r"Correspondence", r"Description and travel|Voyages and travels|Travel"):
+        d = df[df["Subjects"].str.contains(pat, case=False) & ~df["Text#"].isin(picked)]
+        d = d.iloc[rng.permutation(len(d))]
+        picked += list(d["Text#"])
+    d = df[df["Text#"].isin(picked)].set_index("Text#").loc[picked].reset_index()
+    d = d.groupby("Authors", sort=False).head(3)
+    ids = [int(x) for x in d["Text#"].head(n_books)]
+    json.dump(ids, open(out, "w"))
+    return ids
+
+
+def encounter_rows(words: list[str]) -> dict[str, list[dict]]:
+    rows = {w: [] for w in words}
+    ids = encounter_book_ids()
+    for i, bid in enumerate(ids):
+        text = gutenberg_text(bid)
+        if not text:
+            continue
+        for s in split_sentences(text):
+            c = clean_sentence(s)
+            for w in words:
+                if keep_sentence(c, w):
+                    rows[w].append({"word": w, "sentence": c, "genre": "encounter",
+                                    "source_id": f"gutenberg:{bid}"})
+        if (i + 1) % 50 == 0:
+            print(f"[harvest] encounter {i + 1}/{len(ids)} books", flush=True)
     return rows
 
 

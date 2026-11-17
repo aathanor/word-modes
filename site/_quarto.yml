@@ -35,8 +35,8 @@ website:
           - rungs/e7.qmd
           - rungs/e6.qmd
           - rungs/e1.qmd
-          - rungs/e8.qmd
           - text: "---"
+          - further.qmd
           - stops.qmd
       - href: explorer.qmd
         text: Sentences

@@ -1,7 +1,7 @@
 // Interactive strips for rungs 2 and 6: Half-B sentences on the probe axis,
 // scored by a probe trained on Half A. Hover a point to read the sentence.
 (function () {
-  const NAMES = {bert: "BERT", decoder: "Decoder", decoder_final: "Decoder, final token", mpnet: "mpnet"};
+  const NAMES = {bert: "BERT", decoder: "Decoder", decoder_target: "Decoder, at the word", mpnet: "mpnet"};
   const COLOR = {"O": "#1f4e79", "A-gen": "#d9822b", "A-def": "#000000", "A-idiom": "#7f7f7f"};
   const LABELS = ["O", "A-gen", "A-def", "A-idiom"];
   const HALF_B = ["dog", "fork", "tomato", "mountain", "door", "cow", "lamp", "road", "spoon", "stone"];

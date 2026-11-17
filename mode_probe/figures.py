@@ -13,7 +13,7 @@ from .common import config, fdir  # noqa: E402
 
 W = 8.5 / 2.54
 C_O, C_A = "#1f4e79", "#d9822b"
-NAMES = {"bert": "BERT", "decoder": "Decoder", "decoder_final": "Decoder (final tok.)",
+NAMES = {"bert": "BERT", "decoder": "Decoder", "decoder_target": "Decoder (at the word)",
          "mpnet": "mpnet", "multilingual": "mpnet-multi"}
 
 plt.rcParams.update({"font.size": 11, "axes.titlesize": 11, "axes.labelsize": 11,

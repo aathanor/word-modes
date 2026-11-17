@@ -101,6 +101,20 @@ def train_test(df, X, train_mask, test_mask, C):
     return clf, score(clf, X[test_mask])
 
 
+def meandiff_train_test(df, X, train_mask, test_mask):
+    """The simplest direction: mean(A-gen) - mean(O) on standardised training rows, no fitting.
+    Returns (direction in standardised space, scores for all rows of test_mask)."""
+    tr = train_mask & binary_mask(df["label"])
+    sc = StandardScaler().fit(X[tr])
+    Z, y = sc.transform(X[tr]), y_of(df["label"][tr])
+    d = Z[y == 1].mean(0) - Z[y == 0].mean(0)
+    return d, sc.transform(X[test_mask]) @ d
+
+
+def cosine(a: np.ndarray, b: np.ndarray) -> float:
+    return float(a @ b / (np.linalg.norm(a) * np.linalg.norm(b)))
+
+
 def lowo_scores(df, X, C, words=None) -> np.ndarray:
     """Out-of-fold score for every row: each word scored by a probe that never saw it."""
     out = np.full(len(df), np.nan)

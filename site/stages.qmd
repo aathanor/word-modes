@@ -60,7 +60,7 @@ from _site import readouts
 readouts()
 ```
 
-The decoder's limit matters for the grammar test: in a minimal pair such as "The cat is on the mat" and "The cat is a solitary hunter", both sentences begin "The cat", so at "cat" the decoder's two states are identical. Its state at the last word, which has read everything, is reported alongside as a supplement.
+The decoder's limit matters: in a minimal pair such as "The cat is on the mat" and "The cat is a solitary hunter", both sentences begin "The cat", so at "cat" the decoder's two states are identical. So the decoder is read in three ways, at the word, at the last token, and as the mean over the tokens after the word, and Half A chooses among them, as it chooses the layer. It chose the mean after the word. The state at the word is kept as a supplement.
 
 ## 6. The probe and its controls {#probe}
 

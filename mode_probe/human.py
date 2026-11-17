@@ -1,11 +1,13 @@
 """Human labels for the gold sample: a spreadsheet to fill in, and agreement once filled.
 
 python -m mode_probe.human --sheet    # write data/gold_human_to_label.xlsx (refuses to overwrite labels)
-python -m mode_probe.human --report   # kappa of the human labels against Claude, Qwen and the
-                                      # first gold labeling; results/kappa_human_*.csv
+python -m mode_probe.human --report   # kappa of the human labels against the version-3 labels
+                                      # (Claude full set, Claude sample, Qwen); results/v3/kappa_human_*.csv
 
-The sheet shows only the target noun and the sentence: no model or earlier labels.
-The label column has a drop-down of the five labels; anything else is rejected.
+Labels follow LABELING_v3.md (reference x occasion, eight labels), so that human labels can
+test the case the two readings disagree on. The sheet shows only the target noun and the
+sentence: no model or earlier labels. The label column has a drop-down of the eight labels;
+anything else is rejected.
 """
 from __future__ import annotations
 
@@ -16,37 +18,40 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
-from .common import DATA, LABELS, PKG, config, target_spans
-from .label import GOLD, LABELED, QWEN_V2, kappa_report
+from .common import DATA, PKG, RESULTS, config, target_spans
+from .label import GOLD
+from .label_v3 import GOLD as GOLD_V3, LABELED as LABELED_V3, LABELS_V3 as LABELS, QWEN as QWEN_V3
 
 SHEET = DATA / "gold_human_to_label.xlsx"
 
-FILL = {"O": "D6E4F2", "A-gen": "FBE3CC", "A-idiom": "E4DFF7", "A-def": "D7F0E4", "X": "E6E5E0"}
+FILL = {"P-ep": "D6E4F2", "P-gen": "C9DCEB", "K-ep": "FDEBD9", "K-gen": "FBE3CC",
+        "A-idiom": "E4DFF7", "A-simile": "EEE9FA", "A-def": "D7F0E4", "X": "E6E5E0"}
 
 LEGEND = [
-    ("O", "One specific instance (or several particular ones) on an occasion.",
-     "The cat was asleep on the chair. / The cats scratched me as I put them out."),
-    ("A-gen", "Literal general statement about the kind, including habits and procedures.",
-     "Cats hunt at night. / Every spring the men climb the trees and shake the branches."),
-    ("A-idiom", "Fixed expression, figure or simile; the meaning does not involve the thing.",
-     "Let the cat out of the bag. / He fell like a stone."),
-    ("A-def", "States what the thing is: \"a/the X is (a) Y\".",
-     "A spoon is a utensil with a shallow bowl."),
+    ("P-ep", "Particular thing(s), one occasion.",
+     "The cat jumped off the table and knocked the cup over."),
+    ("P-gen", "Particular thing(s), in general: a habit or a standing property.",
+     "My cat always sleeps by the fire. / The bridge carries six lanes."),
+    ("K-ep", "The kind, one occasion (an episode in its history).",
+     "Cats reached Australia in the seventeenth century."),
+    ("K-gen", "The kind, in general.", "Cats hunt at night. / Horses are herbivores."),
+    ("A-idiom", "Fixed expression; the meaning does not involve the thing.", "He let the cat out of the bag."),
+    ("A-simile", "X only as the image in a comparison.", "She moved as quietly as a cat. / It fell like a stone."),
+    ("A-def", "States what the thing is.", "A spoon is a utensil with a small shallow bowl."),
     ("X", "Exclude: modifier or material, a verb, a name or title, another sense, or undecidable.",
-     "stone wall / built of stone / Apple Inc. / the road forks / the chair of the committee"),
+     "stone wall / built of stone / Apple Inc. / the road forks / a binary tree"),
 ]
 
 TESTS = [
-    "Apply in order:",
-    "1. Could the sentence be true of exactly one X on one day, and is that its point?  ->  O",
-    "2. Is X inside a fixed expression or figure (similes included)?  ->  A-idiom",
-    "3. Is it of the form \"a/the X is (a) Y\", stating what X is?  ->  A-def",
-    "4. Otherwise  ->  A-gen",
-    "Before the tests: if X only modifies another noun or names a material, or is another sense "
-    "or part of speech, label X.",
+    "Step 1, first: X, A-idiom, A-simile or A-def, if one applies.",
+    "Step 2, reference: could you point to the X the sentence is about, at least in principle?  "
+    "yes -> P (particular);  no, it holds whichever Xs exist -> K (kind)",
+    "Step 3, occasion: is its point located at a time (an episode, even a long one)?  "
+    "yes -> ep;  no, it says how things go or are at any time -> gen",
+    "A description inside a narrated scene (\"the lamp smoked\") is ep. "
+    "\"Spoons were found in the tomb\" is P: some particular spoons.",
     "",
-    f"The full criterion, with every clarification, is {PKG.name}/LABELING.md. "
-    "Label from the sentence alone.",
+    f"The full criterion is {PKG.name}/LABELING_v3.md. Label from the sentence alone.",
 ]
 
 
@@ -108,7 +113,7 @@ def make_sheet(path: Path = SHEET, force: bool = False) -> Path:
 
     dv = DataValidation(type="list", formula1='"' + ",".join(LABELS) + '"', allow_blank=True)
     dv.error, dv.errorTitle = "Choose one of: " + ", ".join(LABELS), "Not a label"
-    dv.prompt, dv.promptTitle = "O, A-gen, A-idiom, A-def or X", "Label"
+    dv.prompt, dv.promptTitle = "P-ep, P-gen, K-ep, K-gen, A-idiom, A-simile, A-def or X", "Label"
     dv.showErrorMessage = dv.showInputMessage = True
     ws.add_data_validation(dv)
     dv.add(f"D2:D{last}")
@@ -128,7 +133,7 @@ def make_sheet(path: Path = SHEET, force: bool = False) -> Path:
         lg.append([None, line])
     lg.append([])
     lg.append([None, "Labeled so far:", f'=COUNTA(Sentences!D2:D{last})&" of {len(gold)}"'])
-    for col, w in zip("ABC", (9, 70, 70)):
+    for col, w in zip("ABC", (10, 70, 70)):
         lg.column_dimensions[col].width = w
     for row in lg.iter_rows():
         for c in row:
@@ -158,11 +163,16 @@ def report(path: Path = SHEET) -> dict:
         print("[human] no labels yet")
         return {}
     out = {"n": len(human)}
-    others = [("claude", LABELED), ("qwen", QWEN_V2), ("first_gold", GOLD)]
+    from sklearn.metrics import cohen_kappa_score
+
+    (RESULTS / "v3").mkdir(parents=True, exist_ok=True)
+    others = [("claude_full", LABELED_V3), ("claude_sample", GOLD_V3), ("qwen", QWEN_V3)]
     for name, p in others:
         if p.exists():
-            k = kappa_report(human, pd.read_csv(p, keep_default_na=False), name=f"kappa_human_{name}")
-            out[name] = k["overall"]
+            m = human.merge(pd.read_csv(p, keep_default_na=False)[["sid", "label"]], on="sid",
+                            suffixes=("_human", "_other"))
+            out[name] = float(cohen_kappa_score(m["label_human"], m["label_other"]))
+            pd.crosstab(m["label_human"], m["label_other"]).to_csv(RESULTS / "v3" / f"kappa_human_{name}.csv")
     print(f"[human] {len(human)} labels; κ vs " +
           ", ".join(f"{k} {v:.3f}" for k, v in out.items() if k != "n"))
     return out

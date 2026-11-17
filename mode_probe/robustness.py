@@ -51,7 +51,7 @@ def run(device: str = "cpu") -> pd.DataFrame:
     sel = pd.read_csv(RESULTS / "selected.csv").set_index("model")
     sc = pd.read_csv(RESULTS / "scores.csv").set_index("sid").reindex(nat["sid"])
     emb = {m: embed(m, nat, "natural", device) for m in config()["main_models"]}
-    emb["decoder_final"] = emb["decoder"]
+    emb["decoder_target"] = emb["decoder"]
     main = {m: sc[f"{m}_swap"].to_numpy(float) for m in sel.index}
     return table(nat, emb, sel, main, RESULTS)
 

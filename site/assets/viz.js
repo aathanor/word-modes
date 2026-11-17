@@ -6,7 +6,7 @@
     bert: {name: "BERT", color: "#1baf7a", symbol: "circle"},
     decoder: {name: "Decoder", color: "#6250d6", symbol: "square"},
     mpnet: {name: "mpnet", color: "#eda100", symbol: "diamond"},
-    decoder_final: {name: "Decoder, final token", color: "#898781", symbol: "triangle"}
+    decoder_target: {name: "Decoder, at the word", color: "#898781", symbol: "triangle"}
   };
   const INK = "#52514e", GRID = "#e1e0d9", MUTED = "#898781";
   const HALF_A = ["cat", "hammer", "apple", "river", "chair", "horse", "bottle", "bridge", "knife", "tree"];

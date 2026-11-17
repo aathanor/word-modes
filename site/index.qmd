@@ -6,7 +6,7 @@ toc: true
 
 Take the word "cat". You can use it of the cat on your lap, or of cats in general: "Cats hunt at night." Same word, different use. The experiment reported here asks whether that difference leaves a trace in a language model, a system that has only ever seen text.
 
-It does. Where the model places a word depends on which way the word is being used, and the trace is the same from word to word: a rule learned from sentences about ten nouns sorts sentences about ten other nouns it has never seen. It is not genre, not grammar, and not the concreteness of the surrounding words. It is also thin: present, but not one of the main things that vary when a word changes sentence.
+It does. Where the model places a word depends on which way the word is being used, and the trace is the same from word to word: a rule learned from sentences about ten nouns sorts sentences about ten other nouns it has never seen. It is not genre, and not the concreteness of the surrounding words. Nor is it reducible to surface grammar: determiners, number and tense alone sort the same sentences fairly well (AUC 0.80, where 0.5 is chance and 1 perfect), and the models' representations do clearly better (0.92). It is also thin: present, but not one of the main things that vary when a word changes sentence.
 
 Why this is worth knowing and how to read the result pages is discussed below.
 
@@ -14,7 +14,7 @@ A note on the code here: I am a philosopher with basic coding skills, the code h
 
 ## The result in one picture
 
-Each dot is one sentence containing "dog", "fork", "tomato" or one of seven other nouns. Its position comes from a simple rule, a single straight cut through the model's representations, worked out only from sentences about ten *different* nouns ("cat", "hammer", "apple" and others). Sentences about one particular thing (dark blue) land on the left; general statements (orange) land on the right; idioms (grey) fall in between. The rule never saw these ten words and still sorts them.
+Each dot is one sentence containing "dog", "fork", "tomato" or one of seven other nouns. Its position comes from a simple rule, a single straight cut through BERT's representation of the noun, worked out only from sentences about ten *different* nouns ("cat", "hammer", "apple" and others). Sentences about one particular thing (dark blue) land on the left; general statements (orange) land on the right; idioms (grey) fall in between. The rule never saw these ten words and still sorts them.
 
 ```{python}
 from _site import chart
@@ -46,7 +46,7 @@ A positive answer does two things.
 
 It gives the $x^{o}$/$x^{a}$ distinction a foothold outside PCF's notation. The distinction was introduced to describe what happens in a person. If it also shows up as a regularity in public text, found by a model that knows nothing of the framework, then it is a real division in how language is used, and the notation tracks it.
 
-It also says what the model has. The model has the mark of object-mode and none of what makes it object-mode. No encounter stands behind any of its sentences. Its "rod", the region where object-mode uses gather, is a substitute for $x^{o}$ built from sediment, which is the reading of LLMs the framework already gives: a renderer of $\overline{\langle x \rangle}$, restricted by the prompt, with no centre and no history behind the rendering.
+It also says what the model has. The model has the mark of object-mode and none of what makes it object-mode. No encounter stands behind any of its sentences. The side of the cut where object-mode uses fall is a substitute for $x^{o}$ built from sediment, which is the reading of LLMs the framework already gives: a renderer of $\overline{\langle x \rangle}$, restricted by the prompt, with no centre and no history behind the rendering.
 
 A negative answer would also be informative. It would mean that writing from an encounter leaves no regular trace in text, and that the difference between the modes lives only in the speakers. PCF does not need the trace to exist. The claim that LLMs build a substitute for $x^{o}$ from the sediment would fall.
 
@@ -60,14 +60,19 @@ Two things went wrong. First, the validation was circular: the literal and figur
 
 The new experiment keeps the question and changes the cut. Object-mode is compared with literal general predication, $\mathcal{R}(cat^{o}, p)$ against $\mathcal{R}(cat^{a}, p)$, so that literalness is held fixed and only the mode varies. Idioms and definitions are kept as separate groups and never pooled.
 
+## How this relates to work on genericity
+
+Linguists have studied a neighbouring distinction for fifty years. Carlson (1977) showed that bare plurals such as "cats" in "Cats hunt at night" refer to kinds, not to sets of individuals, and Krifka et al. (1995) separated two ways a sentence can generalise: by being about a kind ("The cat is a mammal") and by reporting a regularity rather than an episode ("My cat sleeps by the fire"). Computational work learned to detect generic noun phrases in text (Reiter & Frank 2010; Friedrich & Pinkal 2015). Govindarajan, Van Durme and White (2019) rated every argument and predicate in a treebank for how particular, how kind-like and how episodic it is, and showed that contextual embeddings predict these ratings.
+
+The object-mode/abstract-mode contrast tested here overlaps with that distinction, and the current labels do not separate them. Object-mode as labeled here is "one particular on one occasion", which is also the linguist's episodic sentence about a particular. The two accounts come apart on one kind of sentence: a habit of a particular thing. PCF counts "My cat always sleeps by the fire" as object-mode, because the word is used of an instance known by encounter; the account of genericity groups it with "Cats hunt at night", because both report a regularity. The current labels put such sentences with the general statements. Until that case is tested, what these pages show is as much a result about genericity as about PCF.
+
 ## How the experiment is built
 
-The sentences are natural, taken from encyclopedic text and from fiction, for twenty concrete nouns split into two halves. Every choice of method is made on the first half. The second half is used once, at the end.
+The sentences are natural, taken from encyclopedic text and from fiction, for twenty concrete nouns split into two halves. Every choice of method, such as which layer of a model to read, was made on the first half; the second half never set anything.
 
-::: {.proposed-edit}
-No sentence is labeled by a person. Every sentence is labeled by a language model that reads only the labeling criterion. A sample of 300 sentences is labeled a second time, separately, and every result is also reported on that sample alone. A local model from a different family relabels everything as a cross-check.
-[Proposed change. Original: "A sample of 300 sentences is labeled by hand, and every result is also reported on that sample alone."]{.was}
-:::
+No sentence was labeled by a person. Every sentence was labeled by a language model, Claude Opus 5.5, reading only the labeling criterion. A sample of 300 sentences was labeled a second time, also by Claude Opus 5.5, and every result is also reported on that sample alone. A local model from a different family, Qwen3.8 27B, relabeled everything as a cross-check. Human labels for the sample are planned.
+
+Three models were read. BERT and the decoder give a representation of the noun itself in its sentence, so they carry the claim about words. The third, mpnet, gives one representation for the whole sentence; it shows that the mark is also there at the level of the sentence, but it cannot say where in the sentence it sits.
 
 ```{python}
 from _site import stage_flow
@@ -82,8 +87,8 @@ The results answer four questions in turn. Each test is one experiment, E1 to E8
 
 **Is it something else?**
 
-- **Not genre (E3).** Does the direction carry over from encyclopedic text to fiction and back? Encyclopedias are mostly abstract-mode and novels mostly object-mode, so a genre detector would fail here.
-- **Not grammar (E4).** Does the direction do better than a classifier that sees only determiners, number and tense, and does it survive pairs of sentences with the same surface form ("The cat is on the mat" and "The cat is a solitary hunter")?
+- **Not genre (E3).** Does the direction carry over from encyclopedic text to fiction and back? General statements are three times as common in the encyclopedia sentences as in the novels (39% against 12% of object and general uses), so a direction that only told the genres apart would look like a mode detector inside either source and fail when moved to the other.
+- **Not reducible to surface grammar (E4).** Determiners, number and tense alone already sort the modes fairly well (AUC 0.80). Does the direction do clearly better than a classifier that sees only those, and does it survive pairs of sentences with the same surface form ("The cat is on the mat" and "The cat is a solitary hunter")?
 - **Not concreteness (E5).** Does it survive when the concreteness of the other words in the sentence is removed?
 
 **Does it behave as a mark of the mode should?**
@@ -95,16 +100,13 @@ The results answer four questions in turn. Each test is one experiment, E1 to E8
 
 - **Prominence (E1).** Is the mode one of the main directions along which a word's embeddings vary, with nothing telling the model or the analysis what to look for? This is the test that would support "extracted from the sediment" most directly. It is also the most demanding: a mark can be real, shared and thin. It comes last because it describes the mark the other tests establish.
 
-**Beyond English**
+**Next**
 
-- **Not English syntax (E8)** (if Romanian data is supplied). Does the direction learned on English carry over to Romanian, which marks definiteness differently?
+Romanian (E8) has not been run yet. Its definite article is attached to the end of the noun and generics usually take it ("Pisica este un mamifer"), so the same definite form appears in both modes. A direction learned on English that still sorts Romanian sentences would not be riding on English determiners. The Romanian sentences are to be labeled by a person.
 
 ## How to read the results
 
-::: {.proposed-edit}
-The result pages follow the four questions in that order. Each states the question, the numbers on the full set and on the separately labeled sample, and a verdict per model. A closing section lists every test that did not hold outright or had too little data to decide. The claim stands as far as the tests hold and no further. If the probe does not beat the grammar classifier, the mark is carried mainly by grammar, and the paper becomes a paper about how grammar records the mode.
-[Proposed change. Original: "The result pages follow the ladder in that order. … the numbers on the full set and on the hand-labeled sample … every rung that failed … as far as the ladder holds"]{.was}
-:::
+The result pages follow the four questions in that order. Each states the question, the numbers on the full set and on the 300-sentence sample, and a verdict per model. A closing section lists every test that did not hold outright or had too little data to decide. The claim stands as far as the tests hold and no further.
 
 ## The argument, test by test
 
@@ -113,3 +115,12 @@ from _site import ladder, scripts
 ladder()
 scripts()
 ```
+
+## References
+
+- Carlson, G. N. (1977). *Reference to Kinds in English*. PhD dissertation, University of Massachusetts, Amherst.
+- Friedrich, A., & Pinkal, M. (2015). [Discourse-sensitive automatic identification of generic expressions](https://aclanthology.org/P15-1123/). *Proceedings of ACL-IJCNLP 2015*, 1272–1281.
+- Govindarajan, V., Van Durme, B., & White, A. S. (2019). [Decomposing generalization: Models of generic, habitual, and episodic statements](https://aclanthology.org/Q19-1035/). *Transactions of the ACL*, 7, 501–517.
+- Krifka, M., Pelletier, F. J., Carlson, G. N., ter Meulen, A., Chierchia, G., & Link, G. (1995). Genericity: An introduction. In G. N. Carlson & F. J. Pelletier (Eds.), *The Generic Book* (pp. 1–124). University of Chicago Press.
+- Reiter, N., & Frank, A. (2010). [Identifying generic noun phrases](https://aclanthology.org/P10-1005/). *Proceedings of ACL 2010*, 40–49.
+

@@ -92,6 +92,15 @@ def quick_subset(nat: pd.DataFrame, per_word: int) -> pd.DataFrame:
     return pd.concat(keep).sort_index().reset_index(drop=True)
 
 
+def labeled_frame() -> pd.DataFrame:
+    """The labeled sentences with the gold column, as the full pipeline builds them."""
+    labeled = pd.read_csv(LB.LABELED)
+    gold = pd.read_csv(LB.GOLD, keep_default_na=False)
+    nat = labeled.merge(gold[["sid", "label"]].rename(columns={"label": "gold"}), on="sid", how="left")
+    nat["gold"] = nat["gold"].fillna("").astype(str)
+    return nat.reset_index(drop=True)
+
+
 def save_results(ctx, res: dict, meta: dict) -> None:
     """Everything summary.write needs, so wording changes do not need a rerun."""
     import pickle
@@ -217,8 +226,8 @@ def main(argv=None) -> int:
     pairs = pair_frame()
     pair_emb = {m: embed(m, pairs, "pairs", device) for m in models}
     if "decoder" in models:
-        models.append("decoder_final")
-        pair_emb["decoder_final"] = pair_emb["decoder"]
+        models.append("decoder_target")
+        pair_emb["decoder_target"] = pair_emb["decoder"]
 
     from .concreteness import load_norms, mean_concreteness
 

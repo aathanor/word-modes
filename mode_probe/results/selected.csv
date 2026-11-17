@@ -1,5 +1,5 @@
 model,layer,C
 bert,L9,0.01
-decoder,L21,0.001
+decoder,after_L21,0.001
 mpnet,S,0.01
-decoder_final,final_L21,0.001
+decoder_target,L21,0.001
