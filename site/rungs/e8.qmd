@@ -1,9 +1,0 @@
----
-title: "Not English syntax (E8)"
----
-
-```{python}
-import sys; sys.path.insert(0, "..")
-from _site import rung
-rung("e8")
-```
