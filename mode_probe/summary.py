@@ -37,6 +37,12 @@ def _verdict_lines(verdicts: dict, models) -> str:
     return "\n".join(f"- {NAMES.get(m, m)}: **{verdicts[m]}**" for m in models if m in verdicts)
 
 
+def _when(meta: dict) -> dt.datetime:
+    """When the results were computed: set once by run_all, kept by --summary-only."""
+    meta.setdefault("generated", dt.datetime.now().replace(microsecond=0))
+    return meta["generated"]
+
+
 def write(ctx, res: dict, meta: dict) -> str:
     V = config()["verdicts"]
     models = ctx.models
@@ -55,7 +61,7 @@ def write(ctx, res: dict, meta: dict) -> str:
         L.append(f"> **{meta['tag'].upper()} RUN.** {meta.get('tag_note', '')}\n")
 
     L.append("# Mode-of-use probe: summary\n")
-    L.append(f"Generated {dt.datetime.now():%Y-%m-%d %H:%M}. The claim tested is that "
+    L.append(f"Generated {_when(meta):%Y-%m-%d %H:%M}. The claim tested is that "
              f"{PERMITTED_PHRASE}: the text sediment carries a mark of the mode of use, and models "
              "trained on it pick that mark up. Nothing below says that a model has the distinction "
              "or understands anything.\n")
@@ -379,7 +385,7 @@ def write_verdicts(ctx, res, meta, stops) -> None:
         if key == "e4" and r:
             entry["grammar_wins"] = {m: bool(v) for m, v in r["grammar_wins"].items()}
         rungs.append(entry)
-    out = {"tag": meta.get("tag"), "generated": dt.datetime.now().isoformat(timespec="seconds"),
+    out = {"tag": meta.get("tag"), "generated": _when(meta).isoformat(timespec="seconds"),
            "models": ctx.models, "primary": config()["primary_models"],
            "selected": {m: {"layer": str(v["layer"]), "C": float(v["C"])} for m, v in ctx.sel.items()},
            "data_line": meta["data_line"], "label_line": meta["label_line"],
