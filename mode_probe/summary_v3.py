@@ -43,7 +43,11 @@ def write() -> str:
                 f"labelings come from the same model with the same instruction, so this measures how "
                 f"consistently it applies the criterion, not agreement between independent judges.")
         if "qwen_kappa" in k:
-            line += f" Cross-check, Qwen3.8 27B against the sample: κ = {k['qwen_kappa']:.2f}."
+            line += (f" Cross-check, the local Qwen3.8 27B against the sample: κ = {k['qwen_kappa']:.2f}; "
+                     f"against Claude on all {k.get('qwen_n', 0):,} sentences: "
+                     f"κ = {k.get('qwen_vs_claude_kappa_all', float('nan')):.2f}. Where both put a sentence in "
+                     "P-ep or K-gen, they agree on which in 94% of cases; most of the disagreement is over habits of "
+                     "particular things, which Qwen tends to call episodes (see E9 below).")
         L.append(line + "\n")
         if not k["passed"]:
             L.append("The gate failed, so E9, E10 and the E6 rerun were not run.\n")
@@ -96,6 +100,25 @@ def write() -> str:
             L.append(f"The labeler put {vj['quads_label_agreement']:.0%} of the written sentences in the "
                      "cell they were written for. The quadruples were written by the same model that wrote "
                      "the code.\n")
+        bl = V3 / "e9_by_labeler.csv"
+        if bl.exists():
+            tb = pd.read_csv(bl)
+            L.append("**Does it depend on the labeler?** The local model (Qwen3.8 27B) agrees with Claude on almost all "
+                     "the particular episodes and on most general statements, but moves most of Claude's "
+                     "habits of particular things (P-gen) into the particular episodes. Since E9 rests on "
+                     "exactly that cell, it was repeated with Qwen's labels and with only the sentences "
+                     "both labelers put in the same cell. Added after the results; no verdicts.\n")
+            L.append(_table(["model", "labels", "P-gen position [95% CI]", "K-ep position [95% CI]", "n P-gen / K-ep"],
+                            [[NAMES.get(r.model, r.model), r["labels"],
+                              f"{_f(r['t(P-gen)'])} [{_f(r['t(P-gen) lo'])}, {_f(r['t(P-gen) hi'])}]",
+                              f"{_f(r['t(K-ep)'])} [{_f(r['t(K-ep) lo'])}, {_f(r['t(K-ep) hi'])}]",
+                              f"{int(r['n P-gen'])} / {int(r['n K-ep'])}"] for _, r in tb.iterrows()]) + "\n")
+            L.append("The pattern holds across labelers: the decoder places both disputed cells near the "
+                     "middle, and BERT leans toward reference. With Qwen's labels, BERT's numbers would meet "
+                     "the pre-registered reference prediction (P-gen at 0.31, K-ep at 0.72), because the "
+                     "sentences Qwen still calls P-gen are the clearer cases. With the sentences both labelers "
+                     "agree on, they would not (P-gen at 0.37). How strongly BERT leans toward reference "
+                     "depends on where the line between a habit and an episode is drawn.\n")
         s = V3 / "e9_secondary.csv"
         if s.exists():
             ts = pd.read_csv(s)

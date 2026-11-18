@@ -2,5 +2,8 @@
   "n": 300,
   "kappa": 0.9626104161149106,
   "agreement": 0.9733333333333334,
+  "qwen_kappa": 0.5598092506752926,
+  "qwen_vs_claude_kappa_all": 0.5918903646037705,
+  "qwen_n": 9488,
   "passed": true
 }

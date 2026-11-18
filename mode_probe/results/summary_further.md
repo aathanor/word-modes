@@ -2,7 +2,7 @@
 
 These tests were added after the first results, to separate this experiment's distinction from the linguistic one between episodic and generic sentences, and to test the explanation of the mark offered on the home page. Their criterion, measures and predictions were committed to the repository before their data existed ([PREREGISTRATION_v3.md](https://github.com/aathanor/word-modes/blob/main/mode_probe/PREREGISTRATION_v3.md)), except the UDS-G transfer, which is reported without verdicts.
 
-**Labels (version 3).** Claude Opus 5.5 labeled every sentence under [LABELING_v3.md](https://github.com/aathanor/word-modes/blob/main/mode_probe/LABELING_v3.md); the 300-sentence sample was relabeled in separate requests. Gate: κ = 0.96 (n = 300, eight labels; required 0.7) — passed. Both labelings come from the same model with the same instruction, so this measures how consistently it applies the criterion, not agreement between independent judges.
+**Labels (version 3).** Claude Opus 5.5 labeled every sentence under [LABELING_v3.md](https://github.com/aathanor/word-modes/blob/main/mode_probe/LABELING_v3.md); the 300-sentence sample was relabeled in separate requests. Gate: κ = 0.96 (n = 300, eight labels; required 0.7) — passed. Both labelings come from the same model with the same instruction, so this measures how consistently it applies the criterion, not agreement between independent judges. Cross-check, the local Qwen3.8 27B against the sample: κ = 0.56; against Claude on all 9,488 sentences: κ = 0.59. Where both put a sentence in P-ep or K-gen, they agree on which in 94% of cases; most of the disagreement is over habits of particular things, which Qwen tends to call episodes (see E9 below).
 
 ## Reference or occasion? (E9)
 
@@ -27,6 +27,22 @@ Reference predicts P-gen near 0 and K-ep near 1; occasion predicts the reverse. 
 | mpnet | 40 / 100 | 1.40 | 1.64 | **neither** |
 
 The labeler put 96% of the written sentences in the cell they were written for. The quadruples were written by the same model that wrote the code.
+
+**Does it depend on the labeler?** The local model (Qwen3.8 27B) agrees with Claude on almost all the particular episodes and on most general statements, but moves most of Claude's habits of particular things (P-gen) into the particular episodes. Since E9 rests on exactly that cell, it was repeated with Qwen's labels and with only the sentences both labelers put in the same cell. Added after the results; no verdicts.
+
+| model | labels | P-gen position [95% CI] | K-ep position [95% CI] | n P-gen / K-ep |
+|---|---|---|---|---|
+| BERT | Claude | 0.41 [0.37, 0.46] | 0.76 [0.69, 0.83] | 752 / 224 |
+| BERT | Qwen | 0.31 [0.26, 0.35] | 0.72 [0.67, 0.78] | 303 / 344 |
+| BERT | both agree | 0.37 [0.34, 0.43] | 0.79 [0.73, 0.85] | 226 / 142 |
+| Decoder | Claude | 0.54 [0.51, 0.58] | 0.57 [0.51, 0.63] | 752 / 224 |
+| Decoder | Qwen | 0.48 [0.43, 0.53] | 0.56 [0.51, 0.61] | 303 / 344 |
+| Decoder | both agree | 0.58 [0.54, 0.61] | 0.58 [0.51, 0.65] | 226 / 142 |
+| mpnet | Claude | 0.62 [0.59, 0.67] | 0.62 [0.57, 0.70] | 752 / 224 |
+| mpnet | Qwen | 0.54 [0.49, 0.59] | 0.67 [0.63, 0.73] | 303 / 344 |
+| mpnet | both agree | 0.63 [0.58, 0.67] | 0.69 [0.60, 0.75] | 226 / 142 |
+
+The pattern holds across labelers: the decoder places both disputed cells near the middle, and BERT leans toward reference. With Qwen's labels, BERT's numbers would meet the pre-registered reference prediction (P-gen at 0.31, K-ep at 0.72), because the sentences Qwen still calls P-gen are the clearer cases. With the sentences both labelers agree on, they would not (P-gen at 0.37). How strongly BERT leans toward reference depends on where the line between a habit and an episode is drawn.
 
 **Which way does the original direction point?** Cosine between the E2 direction (object against general, version-2 labels) and a direction trained on reference alone or on occasion alone:
 
